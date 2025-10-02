@@ -1,96 +1,87 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Investor Pro Dashboard</title>
-
-  <!-- PWA Manifest -->
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#1a73e8">
-
-  <!-- Styles -->
+  <title>Investor App</title>
   <link rel="stylesheet" href="styles.css">
-
-  <!-- Icons -->
-  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
-  <link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icons/icon-192.png" type="image/png">
 </head>
 <body>
   <header>
-    <img src="icons/icon-192.png" alt="App Logo" class="app-logo">
-    <h1>Investor's 2-in-1 Property Profit Dashboard</h1>
-    <p class="tagline">Track rental cash flow & renovation budgets with ease</p>
+    <div class="header-logo">
+      <img src="icons/icon-192.png" alt="App Logo">
+      <h1>Investor Dashboard</h1>
+    </div>
+    <p class="tagline">Track your income, expenses, and tenants with ease</p>
   </header>
 
   <main>
-    <section>
-      <h2>Cash Flow Tracker</h2>
-      <form id="cashflow-form">
-        <label>Tenant:
-          <select id="tenant-select"></select>
-          <button type="button" id="add-tenant-btn">Add Tenant</button>
-        </label><br>
-        <label>Income Source:
-          <select id="income-source">
-            <option value="Rent">Rent</option>
-            <option value="Deposit">Deposit</option>
-            <option value="Other">Other</option>
-          </select>
-        </label><br>
-        <label>Amount:
-          <input type="number" id="amount" required>
-        </label><br>
-        <label>Type:
-          <select id="type">
-            <option value="income">Income</option>
-            <option value="expense">Expense</option>
-          </select>
-        </label><br>
+    <section class="form-section">
+      <h2>Add Entry</h2>
+      <form id="entry-form">
+        <label for="tenant">Tenant</label>
+        <select id="tenant" name="tenant">
+          <option value="">Select Tenant</option>
+        </select>
+        <button type="button" id="add-tenant-btn">+ Add Tenant</button>
+
+        <label for="type">Type</label>
+        <select id="type" name="type">
+          <option value="income">Income</option>
+          <option value="expense">Expense</option>
+        </select>
+
+        <label for="source">Source</label>
+        <select id="source" name="source">
+          <option value="rent">Rent</option>
+          <option value="utilities">Utilities</option>
+          <option value="maintenance">Maintenance</option>
+          <option value="other">Other</option>
+        </select>
+
+        <label for="currency">Currency</label>
+        <select id="currency" name="currency">
+          <option value="£">GBP (£)</option>
+          <option value="$">USD ($)</option>
+          <option value="€">EUR (€)</option>
+        </select>
+
+        <label for="amount">Amount</label>
+        <input type="number" id="amount" name="amount" required>
+
         <button type="submit">Add Entry</button>
       </form>
     </section>
 
-    <section>
-      <h2>Renovation Budget Tracker</h2>
-      <form id="renovation-form">
-        <label>Category:
-          <input type="text" id="renovation-category" required>
-        </label><br>
-        <label>Budget:
-          <input type="number" id="renovation-budget" required>
-        </label><br>
-        <label>Actual:
-          <input type="number" id="renovation-actual" required>
-        </label><br>
-        <button type="submit">Add Renovation</button>
-      </form>
+    <section class="sessions">
+      <h2>Sessions</h2>
+      <div id="sessions-list"></div>
+      <button id="save-session-btn">Save Session</button>
+      <button id="load-session-btn">Load Session</button>
+      <button id="delete-session-btn">Delete Session</button>
     </section>
 
-    <section>
-      <h2>Performance Overview</h2>
-      <canvas id="cashflow-chart" width="400" height="200"></canvas>
-      <canvas id="renovation-chart" width="400" height="200"></canvas>
+    <section class="charts">
+      <h2>Overview</h2>
+      <canvas id="incomeChart"></canvas>
+      <canvas id="expenseChart"></canvas>
     </section>
 
-    <section>
-      <h2>Save & Export</h2>
-      <button id="save-session">Save Session</button>
-      <button id="load-session">Load Session</button>
-      <button id="delete-session">Delete Session</button>
-      <button id="export-csv">Export CSV</button>
-      <button id="export-pdf">Export PDF</button>
+    <section class="exports">
+      <h2>Export Data</h2>
+      <button id="export-csv-btn">Export CSV</button>
+      <button id="export-pdf-btn">Export PDF</button>
     </section>
   </main>
 
-  <!-- Scripts -->
+  <footer>
+    <p>&copy; 2025 Investor App — Premium Edition</p>
+  </footer>
+
   <script src="app.js"></script>
-  <script>
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("sw.js")
-        .then(() => console.log("Service Worker registered"))
-        .catch(err => console.error("SW registration failed", err));
-    }
-  </script>
 </body>
 </html>
+```
