@@ -1,4 +1,4 @@
-/* Global styles */
+/* ===== Base ===== */
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background: #f4f6f9;
@@ -7,7 +7,7 @@ body {
   color: #333;
 }
 
-/* Header */
+/* ===== Header ===== */
 header {
   background: linear-gradient(135deg, #1a73e8, #0049b7);
   color: white;
@@ -17,81 +17,89 @@ header {
   box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
 
-.app-logo {
+header .app-logo {
   width: 96px;
   height: 96px;
   object-fit: contain;
   margin-bottom: 1rem;
 }
 
-h1 {
+header h1 {
   margin: 0;
   font-size: 2rem;
   font-weight: 700;
 }
 
-.tagline {
+header .tagline {
   margin-top: 0.5rem;
   font-size: 1rem;
   font-weight: 300;
   color: #e0e0e0;
 }
 
-/* Sections */
+/* ===== Sections ===== */
 main {
   padding: 1.5rem;
 }
 
 section {
-  background: white;
-  border-radius: 12px;
-  padding: 1.5rem;
+  background: #fff;
+  border-radius: 15px;
+  padding: 1rem 1.5rem;
   margin-bottom: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.08);
 }
 
-h2 {
+section h2 {
   margin-top: 0;
   color: #1a73e8;
+  font-size: 1.2rem;
+  border-bottom: 2px solid #e0e0e0;
+  padding-bottom: 0.3rem;
+  margin-bottom: 1rem;
 }
 
-/* Forms */
+/* ===== Forms ===== */
 form label {
   display: block;
-  margin-top: 1rem;
-  font-weight: 600;
+  margin-bottom: 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 500;
 }
 
-form input,
-form select {
-  width: 100%;
+input, select, button {
   padding: 0.5rem;
-  margin-top: 0.25rem;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  font-size: 1rem;
-}
-
-form button,
-button {
-  margin-top: 1rem;
-  padding: 0.6rem 1rem;
-  background: #1a73e8;
-  color: white;
-  border: none;
+  font-size: 0.9rem;
   border-radius: 8px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background 0.2s ease;
+  border: 1px solid #ccc;
+  margin-top: 0.3rem;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-form button:hover,
+button {
+  background: #1a73e8;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  margin-top: 0.5rem;
+  transition: background 0.2s;
+}
+
 button:hover {
   background: #0049b7;
 }
 
-/* Saved sessions */
-#saved-sessions button {
-  margin-right: 0.5rem;
+/* ===== Charts ===== */
+canvas {
+  display: block;
+  max-width: 100%;
+  margin: 1rem auto;
+}
+
+/* ===== Save & Export Section ===== */
+#save-session, #load-session, #delete-session,
+#export-csv, #export-pdf {
   margin-top: 0.5rem;
 }
