@@ -1,218 +1,141 @@
-// ===== Investor Pro App.js =====
+// Data storage
+let entries = [];
+let tenants = JSON.parse(localStorage.getItem('tenants')) || [];
+let savedSessions = JSON.parse(localStorage.getItem('sessions')) || {};
 
-// ---- Global Variables ----
-let tenants = [];
-let sessions = JSON.parse(localStorage.getItem("sessions")) || {};
-let currentSession = null;
+// DOM Elements
+const tenantSelect = document.getElementById('tenant');
+const addTenantBtn = document.getElementById('add-tenant');
+const entryForm = document.getElementById('entry-form');
+const overviewChartCanvas = document.getElementById('overviewChart');
+const sessionNameInput = document.getElementById('session-name');
+const saveSessionBtn = document.getElementById('save-session');
+const savedSessionsDiv = document.getElementById('saved-sessions');
+const exportCsvBtn = document.getElementById('export-csv');
+const exportPdfBtn = document.getElementById('export-pdf');
 
-// ---- DOM Elements ----
-const incomeForm = document.getElementById("income-form");
-const expenseForm = document.getElementById("expense-form");
-const tenantSelects = document.querySelectorAll(".tenant-select");
-const addTenantBtn = document.getElementById("add-tenant-btn");
-const tenantNameInput = document.getElementById("tenant-name-input");
+// Chart instance
+let overviewChart;
 
-const chartCanvas = document.getElementById("financeChart").getContext("2d");
-const saveSessionBtn = document.getElementById("save-session-btn");
-const loadSessionSelect = document.getElementById("load-session-select");
-const loadSessionBtn = document.getElementById("load-session-btn");
-const deleteSessionBtn = document.getElementById("delete-session-btn");
-const exportCSVBtn = document.getElementById("export-csv-btn");
-const exportChartBtn = document.getElementById("export-chart-btn");
+// Populate tenants
+function updateTenantDropdown() {
+  tenantSelect.innerHTML = '<option value="">-- Select Tenant --</option>';
+  tenants.forEach(t => {
+    const option = document.createElement('option');
+    option.value = t;
+    option.textContent = t;
+    tenantSelect.appendChild(option);
+  });
+}
+updateTenantDropdown();
 
-const currencySelect = document.getElementById("currency-select");
-
-// ---- Chart Setup ----
-let chartData = {
-  labels: [],
-  datasets: [
-    {
-      label: "Income",
-      data: [],
-      borderColor: "green",
-      backgroundColor: "rgba(0,200,0,0.3)",
-      fill: true,
-      tension: 0.4
-    },
-    {
-      label: "Expenses",
-      data: [],
-      borderColor: "red",
-      backgroundColor: "rgba(200,0,0,0.3)",
-      fill: true,
-      tension: 0.4
-    }
-  ]
-};
-
-let financeChart = new Chart(chartCanvas, {
-  type: "line",
-  data: chartData,
-  options: {
-    responsive: true,
-    plugins: {
-      legend: {
-        position: "top"
-      }
-    },
-    scales: {
-      y: {
-        beginAtZero: true,
-        ticks: {
-          callback: function(value) {
-            return currencySelect.value + value;
-          }
-        }
-      }
-    }
+// Add tenant
+addTenantBtn.addEventListener('click', () => {
+  const newTenant = prompt("Enter new tenant name:");
+  if (newTenant && !tenants.includes(newTenant)) {
+    tenants.push(newTenant);
+    localStorage.setItem('tenants', JSON.stringify(tenants));
+    updateTenantDropdown();
   }
 });
 
-// ---- Functions ----
-function updateTenantSelects() {
-  tenantSelects.forEach(select => {
-    select.innerHTML = "";
-    tenants.forEach(t => {
-      const opt = document.createElement("option");
-      opt.value = t;
-      opt.textContent = t;
-      select.appendChild(opt);
-    });
-  });
-}
+// Add entry
+entryForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+  const tenant = tenantSelect.value;
+  const income = parseFloat(document.getElementById('income').value) || 0;
+  const expense = parseFloat(document.getElementById('expense').value) || 0;
+  if (!tenant) return alert("Please select a tenant.");
 
-function addTenant() {
-  const tenantName = tenantNameInput.value.trim();
-  if (tenantName && !tenants.includes(tenantName)) {
-    tenants.push(tenantName);
-    updateTenantSelects();
-    tenantNameInput.value = "";
-  }
-}
+  entries.push({ tenant, income, expense, date: new Date().toISOString() });
+  updateChart();
+  entryForm.reset();
+});
 
-function addData(label, income, expense) {
-  chartData.labels.push(label);
-  chartData.datasets[0].data.push(income);
-  chartData.datasets[1].data.push(expense);
-  financeChart.update();
-}
+// Chart rendering
+function updateChart() {
+  const labels = entries.map((_, i) => `Entry ${i+1}`);
+  const incomeData = entries.map(e => e.income);
+  const expenseData = entries.map(e => e.expense);
 
-function saveSession() {
-  const sessionName = prompt("Enter session name:");
-  if (!sessionName) return;
-
-  const data = {
-    tenants,
-    chartData,
-    currency: currencySelect.value
-  };
-
-  sessions[sessionName] = data;
-  localStorage.setItem("sessions", JSON.stringify(sessions));
-  refreshSessionList();
-  currentSession = sessionName;
-  alert("Session saved.");
-}
-
-function loadSession() {
-  const sessionName = loadSessionSelect.value;
-  if (!sessionName) return;
-
-  const data = sessions[sessionName];
-  tenants = data.tenants;
-  chartData = data.chartData;
-  currencySelect.value = data.currency;
-
-  financeChart.destroy();
-  financeChart = new Chart(chartCanvas, {
-    type: "line",
-    data: chartData,
+  if (overviewChart) overviewChart.destroy();
+  overviewChart = new Chart(overviewChartCanvas, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Income (£)', data: incomeData, borderColor: 'green', fill: false, tension: 0.4 },
+        { label: 'Expense (£)', data: expenseData, borderColor: 'red', fill: false, tension: 0.4 }
+      ]
+    },
     options: {
       responsive: true,
-      plugins: {
-        legend: { position: "top" }
-      },
-      scales: {
-        y: {
-          beginAtZero: true,
-          ticks: {
-            callback: function(value) {
-              return currencySelect.value + value;
-            }
-          }
-        }
-      }
+      plugins: { legend: { position: 'top' } },
+      scales: { y: { beginAtZero: true } }
     }
   });
-
-  updateTenantSelects();
-  alert("Session loaded.");
 }
 
-function deleteSession() {
-  const sessionName = loadSessionSelect.value;
-  if (!sessionName) return;
+// Save session
+saveSessionBtn.addEventListener('click', () => {
+  const name = sessionNameInput.value.trim();
+  if (!name) return alert("Enter a session name");
+  savedSessions[name] = { entries, tenants };
+  localStorage.setItem('sessions', JSON.stringify(savedSessions));
+  renderSessions();
+});
 
-  delete sessions[sessionName];
-  localStorage.setItem("sessions", JSON.stringify(sessions));
-  refreshSessionList();
-  alert("Session deleted.");
-}
+// Render saved sessions
+function renderSessions() {
+  savedSessionsDiv.innerHTML = '';
+  Object.keys(savedSessions).forEach(name => {
+    const loadBtn = document.createElement('button');
+    loadBtn.textContent = `Load: ${name}`;
+    loadBtn.onclick = () => {
+      entries = savedSessions[name].entries;
+      tenants = savedSessions[name].tenants;
+      localStorage.setItem('tenants', JSON.stringify(tenants));
+      updateTenantDropdown();
+      updateChart();
+    };
 
-function refreshSessionList() {
-  loadSessionSelect.innerHTML = "";
-  Object.keys(sessions).forEach(name => {
-    const opt = document.createElement("option");
-    opt.value = name;
-    opt.textContent = name;
-    loadSessionSelect.appendChild(opt);
+    const delBtn = document.createElement('button');
+    delBtn.textContent = `Delete: ${name}`;
+    delBtn.onclick = () => {
+      delete savedSessions[name];
+      localStorage.setItem('sessions', JSON.stringify(savedSessions));
+      renderSessions();
+    };
+
+    savedSessionsDiv.appendChild(loadBtn);
+    savedSessionsDiv.appendChild(delBtn);
   });
 }
+renderSessions();
 
-function exportCSV() {
-  let csv = "Label,Income,Expenses\n";
-  chartData.labels.forEach((label, i) => {
-    csv += `${label},${chartData.datasets[0].data[i]},${chartData.datasets[1].data[i]}\n`;
+// Export CSV
+exportCsvBtn.addEventListener('click', () => {
+  let csv = "Tenant,Income,Expense,Date\n";
+  entries.forEach(e => {
+    csv += `${e.tenant},${e.income},${e.expense},${e.date}\n`;
   });
-
-  const blob = new Blob([csv], { type: "text/csv" });
+  const blob = new Blob([csv], { type: 'text/csv' });
   const url = URL.createObjectURL(blob);
-
-  const a = document.createElement("a");
+  const a = document.createElement('a');
   a.href = url;
-  a.download = "finance_data.csv";
+  a.download = 'session.csv';
   a.click();
-}
-
-function exportChart() {
-  const link = document.createElement("a");
-  link.href = financeChart.toBase64Image();
-  link.download = "finance_chart.png";
-  link.click();
-}
-
-// ---- Event Listeners ----
-addTenantBtn.addEventListener("click", addTenant);
-
-incomeForm.addEventListener("submit", e => {
-  e.preventDefault();
-  const tenant = incomeForm.querySelector(".tenant-select").value;
-  const amount = parseFloat(incomeForm.querySelector("input[name='amount']").value);
-  if (tenant && amount) {
-    addData(`${tenant} Income`, amount, 0);
-    incomeForm.reset();
-  }
+  URL.revokeObjectURL(url);
 });
 
-expenseForm.addEventListener("submit", e => {
-  e.preventDefault();
-  const tenant = expenseForm.querySelector(".tenant-select").value;
-  const amount = parseFloat(expenseForm.querySelector("input[name='amount']").value);
-  if (tenant && amount) {
-    addData(`${tenant} Expense`, 0, amount);
-    expenseForm.reset();
-  }
+// Export PDF
+exportPdfBtn.addEventListener('click', () => {
+  const { jsPDF } = window.jspdf;
+  if (!jsPDF) return alert("PDF library not loaded.");
+  const doc = new jsPDF();
+  doc.text("Session Data", 10, 10);
+  entries.forEach((e, i) => {
+    doc.text(`${i+1}. Tenant: ${e.tenant}, Income: £${e.income}, Expense: £${e.expense}`, 10, 20 + i*10);
+  });
+  doc.save('session.pdf');
 });
-
-saveSessionBtn.addEventListener("click", saveSession);
-loadSessionBtn.addEventListener("clic
