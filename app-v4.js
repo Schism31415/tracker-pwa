@@ -1,162 +1,146 @@
-// ================== Global State ==================
-let tenants = JSON.parse(localStorage.getItem("tenants")) || [];
-let currentTenant = null;
-let tenantData = JSON.parse(localStorage.getItem("tenantData")) || {};
-let sessions = JSON.parse(localStorage.getItem("sessions")) || [];
+document.addEventListener("DOMContentLoaded", () => {
+  const tenantInput = document.getElementById("tenantInput");
+  const addTenantBtn = document.getElementById("addTenant");
+  const removeTenantBtn = document.getElementById("removeTenant");
+  const tenantSelect = document.getElementById("tenant");
 
-// ================== DOM Elements ==================
-const tenantSelect = document.getElementById("tenant");
-const addTenantBtn = document.getElementById("addTenant");
-const removeTenantBtn = document.getElementById("removeTenant");
+  const incomeForm = document.getElementById("incomeForm");
+  const expenseForm = document.getElementById("expenseForm");
+  const incomeChartEl = document.getElementById("incomeChart");
+  const expenseChartEl = document.getElementById("expenseChart");
 
-const sessionNameInput = document.getElementById("sessionName");
-const saveSessionBtn = document.getElementById("saveSession");
-const loadSessionBtn = document.getElementById("loadSession");
-const deleteSessionBtn = document.getElementById("deleteSession");
-const sessionSelect = document.getElementById("session");
+  const saveSessionBtn = document.getElementById("saveSession");
+  const loadSessionBtn = document.getElementById("loadSession");
+  const deleteSessionBtn = document.getElementById("deleteSession");
+  const sessionNameInput = document.getElementById("sessionName");
+  const sessionSelect = document.getElementById("session");
 
-// ================== Chart Setup ==================
-const incomeCtx = document.getElementById("incomeChart").getContext("2d");
-const expenseCtx = document.getElementById("expenseChart").getContext("2d");
+  let tenants = [];
+  let incomes = {};
+  let expenses = {};
 
-let incomeChart = new Chart(incomeCtx, {
-  type: "line",
-  data: { labels: [], datasets: [{ label: "Income (£)", borderColor: "#ffd700", data: [] }] },
-  options: { responsive: true, plugins: { legend: { labels: { color: "#ffd700" } } }, scales: { x: { ticks: { color: "#ffd700" } }, y: { ticks: { color: "#ffd700" } } } }
-});
-
-let expenseChart = new Chart(expenseCtx, {
-  type: "line",
-  data: { labels: [], datasets: [{ label: "Expenses (£)", borderColor: "#ff4d4d", data: [] }] },
-  options: { responsive: true, plugins: { legend: { labels: { color: "#ffd700" } } }, scales: { x: { ticks: { color: "#ffd700" } }, y: { ticks: { color: "#ffd700" } } } }
-});
-
-// ================== Functions ==================
-function updateTenantDropdown() {
-  tenantSelect.innerHTML = "";
-  tenants.forEach(t => {
-    const opt = document.createElement("option");
-    opt.value = t;
-    opt.textContent = t;
-    tenantSelect.appendChild(opt);
+  // Add Tenant
+  addTenantBtn.addEventListener("click", () => {
+    const tenant = tenantInput.value.trim();
+    if (tenant && !tenants.includes(tenant)) {
+      tenants.push(tenant);
+      const option = document.createElement("option");
+      option.value = tenant;
+      option.textContent = tenant;
+      tenantSelect.appendChild(option);
+      incomes[tenant] = [];
+      expenses[tenant] = [];
+      tenantInput.value = "";
+    }
   });
-  if (currentTenant && tenants.includes(currentTenant)) {
-    tenantSelect.value = currentTenant;
-  } else {
-    currentTenant = null;
-  }
-}
 
-function updateSessionDropdown() {
-  sessionSelect.innerHTML = "";
-  sessions.forEach(s => {
-    const opt = document.createElement("option");
-    opt.value = s.name;
-    opt.textContent = s.name;
-    sessionSelect.appendChild(opt);
+  // Remove Tenant
+  removeTenantBtn.addEventListener("click", () => {
+    const tenant = tenantSelect.value;
+    if (tenant) {
+      tenants = tenants.filter(t => t !== tenant);
+      incomes[tenant] = [];
+      expenses[tenant] = [];
+      [...tenantSelect.options].forEach(opt => {
+        if (opt.value === tenant) opt.remove();
+      });
+    }
   });
-}
 
-function saveState() {
-  localStorage.setItem("tenants", JSON.stringify(tenants));
-  localStorage.setItem("tenantData", JSON.stringify(tenantData));
-  localStorage.setItem("sessions", JSON.stringify(sessions));
-}
+  // Charts setup
+  const incomeChart = new Chart(incomeChartEl, {
+    type: "line",
+    data: { labels: [], datasets: [{ label: "Income", data: [], borderColor: "#4caf50", fill: false }] }
+  });
 
-function loadTenantData(name) {
-  if (!tenantData[name]) tenantData[name] = { income: [], expenses: [] };
-  let data = tenantData[name];
+  const expenseChart = new Chart(expenseChartEl, {
+    type: "line",
+    data: { labels: [], datasets: [{ label: "Expenses", data: [], borderColor: "#f44336", fill: false }] }
+  });
 
-  incomeChart.data.labels = data.income.map((_, i) => `Entry ${i + 1}`);
-  incomeChart.data.datasets[0].data = data.income;
-  expenseChart.data.labels = data.expenses.map((_, i) => `Entry ${i + 1}`);
-  expenseChart.data.datasets[0].data = data.expenses;
+  // Add Income
+  incomeForm.addEventListener("submit", e => {
+    e.preventDefault();
+    const tenant = tenantSelect.value;
+    const amount = parseFloat(document.getElementById("incomeAmount").value);
+    if (tenant && amount) {
+      incomes[tenant].push(amount);
+      updateCharts();
+      incomeForm.reset();
+    }
+  });
 
-  incomeChart.update();
-  expenseChart.update();
-}
+  // Add Expense
+  expenseForm.addEventListener("submit", e => {
+    e.preventDefault();
+    const tenant = tenantSelect.value;
+    const amount = parseFloat(document.getElementById("expenseAmount").value);
+    if (tenant && amount) {
+      expenses[tenant].push(amount);
+      updateCharts();
+      expenseForm.reset();
+    }
+  });
 
-// ================== Tenant Events ==================
-addTenantBtn.addEventListener("click", () => {
-  const newTenant = document.getElementById("tenantInput").value.trim();
-  if (newTenant && !tenants.includes(newTenant)) {
-    tenants.push(newTenant);
-    tenantData[newTenant] = { income: [], expenses: [] };
-    currentTenant = newTenant;
-    saveState();
-    updateTenantDropdown();
-    loadTenantData(currentTenant);
-    document.getElementById("tenantInput").value = "";
-  }
-});
+  // Update charts
+  function updateCharts() {
+    const tenant = tenantSelect.value;
+    if (!tenant) return;
 
-removeTenantBtn.addEventListener("click", () => {
-  if (tenantSelect.value) {
-    const toRemove = tenantSelect.value;
-    const confirmed = confirm(`Are you sure you want to remove tenant "${toRemove}" and all their data?`);
-    if (!confirmed) return;
-
-    tenants = tenants.filter(t => t !== toRemove);
-    delete tenantData[toRemove];
-    currentTenant = null;
-    saveState();
-    updateTenantDropdown();
-
-    // Reset charts
-    incomeChart.data.labels = [];
-    incomeChart.data.datasets[0].data = [];
-    expenseChart.data.labels = [];
-    expenseChart.data.datasets[0].data = [];
+    incomeChart.data.labels = incomes[tenant].map((_, i) => `Entry ${i + 1}`);
+    incomeChart.data.datasets[0].data = incomes[tenant];
     incomeChart.update();
+
+    expenseChart.data.labels = expenses[tenant].map((_, i) => `Entry ${i + 1}`);
+    expenseChart.data.datasets[0].data = expenses[tenant];
     expenseChart.update();
   }
+
+  // Session Save
+  saveSessionBtn.addEventListener("click", () => {
+    const name = sessionNameInput.value.trim();
+    if (name) {
+      const data = { tenants, incomes, expenses };
+      localStorage.setItem(name, JSON.stringify(data));
+
+      if (![...sessionSelect.options].some(opt => opt.value === name)) {
+        const option = document.createElement("option");
+        option.value = name;
+        option.textContent = name;
+        sessionSelect.appendChild(option);
+      }
+      sessionNameInput.value = "";
+    }
+  });
+
+  // Session Load
+  loadSessionBtn.addEventListener("click", () => {
+    const name = sessionSelect.value;
+    if (name) {
+      const data = JSON.parse(localStorage.getItem(name));
+      tenants = data.tenants;
+      incomes = data.incomes;
+      expenses = data.expenses;
+
+      tenantSelect.innerHTML = "";
+      tenants.forEach(t => {
+        const option = document.createElement("option");
+        option.value = t;
+        option.textContent = t;
+        tenantSelect.appendChild(option);
+      });
+      updateCharts();
+    }
+  });
+
+  // Session Delete
+  deleteSessionBtn.addEventListener("click", () => {
+    const name = sessionSelect.value;
+    if (name) {
+      localStorage.removeItem(name);
+      [...sessionSelect.options].forEach(opt => {
+        if (opt.value === name) opt.remove();
+      });
+    }
+  });
 });
-
-// ================== Session Events ==================
-saveSessionBtn.addEventListener("click", () => {
-  const sessionName = sessionNameInput.value.trim();
-  if (!sessionName) return alert("Enter a session name");
-
-  const newSession = { name: sessionName, tenants: [...tenants], tenantData: { ...tenantData } };
-  sessions = sessions.filter(s => s.name !== sessionName); // overwrite if exists
-  sessions.push(newSession);
-
-  saveState();
-  updateSessionDropdown();
-  sessionNameInput.value = "";
-});
-
-loadSessionBtn.addEventListener("click", () => {
-  if (!sessionSelect.value) return alert("Select a session first");
-
-  const session = sessions.find(s => s.name === sessionSelect.value);
-  if (!session) return;
-
-  tenants = [...session.tenants];
-  tenantData = { ...session.tenantData };
-  currentTenant = tenants.length ? tenants[0] : null;
-
-  saveState();
-  updateTenantDropdown();
-  if (currentTenant) loadTenantData(currentTenant);
-});
-
-deleteSessionBtn.addEventListener("click", () => {
-  if (!sessionSelect.value) return alert("Select a session to delete");
-
-  const toRemove = sessionSelect.value;
-  const confirmed = confirm(`Are you sure you want to delete session "${toRemove}"?`);
-  if (!confirmed) return;
-
-  sessions = sessions.filter(s => s.name !== toRemove);
-  saveState();
-  updateSessionDropdown();
-});
-
-// ================== Init ==================
-updateTenantDropdown();
-updateSessionDropdown();
-if (tenants.length > 0) {
-  currentTenant = tenants[0];
-  loadTenantData(currentTenant);
-}
