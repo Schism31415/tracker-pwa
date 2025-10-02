@@ -103,14 +103,48 @@ form.addEventListener("submit", e => {
 });
 
 // ----------------- Tenant Handling -----------------
+// ===== Tenant Management =====
+const tenantSelects = document.querySelectorAll(".tenant-select");
+const tenantList = document.getElementById("tenant-list");
+const addTenantBtn = document.getElementById("add-tenant");
+const tenantInput = document.getElementById("new-tenant");
+
+let tenants = JSON.parse(localStorage.getItem("tenants")) || [];
+
+function renderTenants() {
+  tenantSelects.forEach(select => {
+    select.innerHTML = `<option value="">-- Select Tenant --</option>`;
+    tenants.forEach(t => {
+      const option = document.createElement("option");
+      option.value = t;
+      option.textContent = t;
+      select.appendChild(option);
+    });
+  });
+
+  // Show tenants in the sidebar list (optional)
+  tenantList.innerHTML = tenants.map(t => `<li>${t}</li>`).join("");
+}
+
 addTenantBtn.addEventListener("click", () => {
-  const tenantName = prompt("Enter tenant name:");
-  if (tenantName && !tenants.includes(tenantName)) {
-    tenants.push(tenantName);
-    updateTenantDropdown();
-    saveToLocalStorage();
+  const name = tenantInput.value.trim();
+  if (name && !tenants.includes(name)) {
+    tenants.push(name);
+    localStorage.setItem("tenants", JSON.stringify(tenants));
+    tenantInput.value = "";
+    renderTenants();
   }
 });
+
+// Allow tenant removal
+function removeTenant(name) {
+  tenants = tenants.filter(t => t !== name);
+  localStorage.setItem("tenants", JSON.stringify(tenants));
+  renderTenants();
+}
+
+renderTenants();
+
 
 // ----------------- Sessions -----------------
 saveSessionBtn.addEventListener("click", () => {
@@ -167,3 +201,4 @@ exportGraphBtn.addEventListener("click", () => {
 // ----------------- Init -----------------
 loadFromLocalStorage();
 ```
+
