@@ -212,8 +212,45 @@ document.getElementById("export-graph").addEventListener("click", () => {
   link.click();
 });
 
+// ===== EXPORT PDF =====
+document.getElementById("export-pdf").addEventListener("click", () => {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+
+  doc.setFontSize(16);
+  doc.text("Investor Dashboard Report", 20, 20);
+
+  doc.setFontSize(12);
+  doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, 30);
+  doc.text(`Currency: ${selectedCurrency}`, 20, 37);
+
+  // Income summary
+  let y = 50;
+  doc.text("Income:", 20, y);
+  incomes.forEach(inc => {
+    y += 7;
+    doc.text(`${inc.date} | ${inc.source} | ${inc.tenant} | ${selectedCurrency} ${inc.amount.toFixed(2)}`, 25, y);
+  });
+
+  // Expense summary
+  y += 15;
+  doc.text("Expenses:", 20, y);
+  expenses.forEach(exp => {
+    y += 7;
+    doc.text(`${exp.date} | ${exp.category} | ${exp.tenant} | ${selectedCurrency} ${exp.amount.toFixed(2)}`, 25, y);
+  });
+
+  // Chart image
+  const chartImg = cashflowChart.toBase64Image();
+  doc.addPage();
+  doc.text("Cashflow Chart", 20, 20);
+  doc.addImage(chartImg, "PNG", 15, 30, 180, 100);
+
+  doc.save("investor_dashboard_report.pdf");
+});
+
 // ===== CURRENCY SELECTION =====
-const currencySelect = document.createElement("select");
+const currencySelect = document.getElementById("currency-select");
 ["$", "£", "€"].forEach(curr => {
   const opt = document.createElement("option");
   opt.value = curr;
@@ -225,4 +262,3 @@ currencySelect.addEventListener("change", e => {
   renderIncomeTable();
   renderExpenseTable();
 });
-document.querySelector(".container").insertBefore(currencySelect, document.querySelector("section"));
