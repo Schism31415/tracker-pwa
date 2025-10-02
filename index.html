@@ -6,9 +6,7 @@
   <title>Premium Investor App</title>
   <link rel="stylesheet" href="styles2.css" />
   <link rel="manifest" href="manifest.json" />
-  <!-- Chart.js for graphs -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
   <!-- Header -->
@@ -20,71 +18,28 @@
 
   <!-- Description -->
   <section class="description">
-    <p>Manage income, expenses, tenants, and sessions with a premium look and feel.</p>
+    <p>Welcome to your premium investor dashboard. Add tenants, track income & expenses, and visualize performance.</p>
   </section>
 
   <!-- Tenant Management -->
   <section>
-    <h2>Tenants</h2>
+    <h2>Tenant Management</h2>
     <div class="tenant-actions">
-      <input type="text" id="tenantName" placeholder="Enter tenant name" />
-      <button id="addTenant">Add Tenant</button>
+      <input type="text" id="tenantInput" placeholder="Enter tenant name" />
+      <button type="button" id="addTenant">Add Tenant</button>
+      <button type="button" id="removeTenant">Remove Tenant</button>
     </div>
-    <select id="tenantSelect">
-      <option value="">Select Tenant</option>
-    </select>
+    <label for="tenant">Select Tenant</label>
+    <select id="tenant"></select>
   </section>
 
-  <!-- Income and Expenses -->
-  <section>
-    <h2>Transactions</h2>
-    <form id="transactionForm">
-      <label for="type">Type</label>
-      <select id="type" required>
-        <option value="income">Income</option>
-        <option value="expense">Expense</option>
-      </select>
-
-      <label for="amount">Amount</label>
-      <input type="number" id="amount" placeholder="Enter amount" required />
-
-      <label for="currency">Currency</label>
-      <select id="currency">
-        <option value="£">£ (GBP)</option>
-        <option value="$">$ (USD)</option>
-        <option value="€">€ (EUR)</option>
-      </select>
-
-      <label for="category">Category</label>
-      <input type="text" id="category" placeholder="Enter category" />
-
-      <button type="submit">Add Transaction</button>
-    </form>
-  </section>
-
-  <!-- Analytics / Charts -->
+  <!-- Analytics -->
   <section>
     <h2>Analytics</h2>
     <canvas id="incomeChart" width="400" height="200"></canvas>
     <canvas id="expenseChart" width="400" height="200"></canvas>
   </section>
 
-  <!-- Session Management -->
-  <section>
-    <h2>Sessions</h2>
-    <div class="session-actions">
-      <input type="text" id="sessionName" placeholder="Session name" />
-      <button id="saveSession">Save</button>
-      <button id="loadSession">Load</button>
-      <button id="deleteSession">Delete</button>
-      <button id="exportCSV">Export CSV</button>
-      <button id="exportPDF">Export PDF</button>
-    </div>
-  </section>
-
-  <!-- JS -->
   <script src="app-v4.js"></script>
 </body>
 </html>
-
-
