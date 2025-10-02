@@ -1,179 +1,135 @@
-/* General Reset */
+```css
+/* Base styles */
 body {
   margin: 0;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: #f5f7fa;
-  color: #333;
+  padding: 0;
+  font-family: "Segoe UI", Roboto, Arial, sans-serif;
+  background-color: #0d0d0d; /* Dark background */
+  color: #f5f5f5;
   line-height: 1.6;
 }
 
 /* Header */
 header {
-  background: linear-gradient(135deg, #4caf50, #388e3c);
-  color: white;
-  padding: 25px 20px;
+  background: linear-gradient(135deg, #1a1a1a, #0d0d0d);
+  color: #d4af37; /* Gold accent */
+  padding: 1.5rem;
   text-align: center;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  font-size: 1.8rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  border-bottom: 2px solid #d4af37;
 }
 
-header h1 {
-  margin: 0;
-  font-size: 1.9rem;
+/* Section titles */
+h2 {
+  margin: 1rem 0;
+  color: #d4af37;
+  font-size: 1.4rem;
+  text-align: center;
+  font-weight: 500;
 }
 
-header .subtitle {
-  margin-top: 10px;
-  font-size: 1rem;
-  font-weight: 300;
-  opacity: 0.9;
+/* Container */
+.container {
+  width: 90%;
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 1rem;
 }
 
-/* Sections */
-section {
-  background: white;
-  margin: 20px;
-  padding: 20px;
-  border-radius: 14px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+/* Form styling */
+form {
+  background: #1a1a1a;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+  margin-bottom: 2rem;
 }
 
-section h2 {
-  margin-top: 0;
-  font-size: 1.3rem;
-  color: #444;
-  border-bottom: 2px solid #eee;
-  padding-bottom: 6px;
+form label {
+  display: block;
+  margin: 0.5rem 0 0.25rem;
+  font-weight: 500;
+  color: #f0f0f0;
 }
 
-/* Forms */
-label {
-  font-weight: bold;
-  display: inline-block;
-  margin-right: 8px;
-}
-
-input, select, button {
-  padding: 10px;
-  margin: 8px 0;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  font-size: 1rem;
+form input,
+form select,
+form button {
   width: 100%;
-  box-sizing: border-box;
-  transition: all 0.2s ease-in-out;
+  padding: 0.7rem 1rem;
+  margin-bottom: 1rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
 }
 
-input:focus, select:focus {
-  border-color: #4caf50;
-  outline: none;
-  box-shadow: 0 0 5px rgba(76,175,80,0.3);
+/* Input styling */
+form input,
+form select {
+  background: #2a2a2a;
+  color: #fff;
+}
+
+form input:focus,
+form select:focus {
+  outline: 2px solid #d4af37;
 }
 
 /* Buttons */
+form button,
 button {
-  background: #4caf50;
-  border: none;
-  color: white;
-  font-weight: bold;
+  background: #d4af37;
+  color: #0d0d0d;
+  font-weight: 600;
   cursor: pointer;
-  transition: background 0.3s, transform 0.1s;
+  transition: all 0.3s ease;
 }
 
+form button:hover,
 button:hover {
-  background: #388e3c;
+  background: #f0d879;
 }
 
-button:active {
-  transform: scale(0.97);
-}
-
-.delete-btn {
-  background: transparent;
-  color: #f44336;
-  border: none;
-  font-size: 1.1rem;
-  cursor: pointer;
-  margin-left: 10px;
-  transition: color 0.2s;
-}
-
-.delete-btn:hover {
-  color: #b71c1c;
-}
-
-/* Lists */
-ul {
-  list-style: none;
-  padding: 0;
-}
-
-ul li {
-  background: #f9f9f9;
-  margin: 6px 0;
-  padding: 10px;
-  border-radius: 8px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-/* Charts */
-.charts canvas {
-  margin: 20px 0;
-  width: 100%;
-  max-height: 300px;
-}
-
-/* Tenant Summary */
-.tenant-summary {
-  margin: 2rem 0;
-}
-
-.card-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 1rem;
-}
-
-.tenant-card {
-  background: linear-gradient(145deg, #ffffff, #f0f0f0);
+/* Cards for sections */
+.card {
+  background: #1a1a1a;
   border-radius: 12px;
   padding: 1rem;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  text-align: center;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
 }
 
-.tenant-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 6px 14px rgba(0,0,0,0.12);
+/* Chart container */
+.chart-container {
+  position: relative;
+  width: 100%;
+  height: 300px;
+  margin-top: 1rem;
+  background: #121212;
+  border-radius: 12px;
+  padding: 1rem;
 }
 
-.tenant-card h3 {
-  margin-bottom: 0.5rem;
-  font-size: 1.2rem;
+/* Session buttons */
+.session-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 1rem 0;
 }
 
-.tenant-card .income {
-  color: #4caf50;
-  font-weight: 500;
-}
-
-.tenant-card .expense {
-  color: #f44336;
-  font-weight: 500;
-}
-
-.tenant-card .net {
-  font-weight: bold;
-  font-size: 1.1rem;
-  margin-top: 0.5rem;
+.session-controls button {
+  flex: 1 1 calc(50% - 0.5rem);
 }
 
 /* Footer */
 footer {
   text-align: center;
-  padding: 15px;
+  padding: 1rem;
   font-size: 0.9rem;
-  color: #555;
+  color: #888;
+  margin-top: 2rem;
 }
+```
