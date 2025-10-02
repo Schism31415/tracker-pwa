@@ -1,162 +1,53 @@
-let tenants = [];
-let entries = [];
-let sessions = {};
-let incomeExpenseChart, cashFlowChart;
+let incomeExpenseChart;
+let cashFlowChart;
 
-document.addEventListener("DOMContentLoaded", () => {
-  // Tenant buttons
-  document.getElementById("addTenantBtn").addEventListener("click", addTenant);
-  document.getElementById("removeTenantBtn").addEventListener("click", removeTenant);
-
-  // Entry form
-  document.getElementById("entryForm").addEventListener("submit", (e) => {
-    e.preventDefault();
-    addEntry();
-  });
-
-  // Session buttons
-  document.getElementById("saveSessionBtn").addEventListener("click", saveSession);
-  document.getElementById("loadSessionBtn").addEventListener("click", loadSession);
-  document.getElementById("deleteSessionBtn").addEventListener("click", deleteSession);
-
-  // ✅ Draw empty charts on first load
-  updateCharts();
-});
-
-// --- Tenant Functions ---
-function addTenant() {
-  const name = document.getElementById("tenantName").value.trim();
-  if (name && !tenants.includes(name)) {
-    tenants.push(name);
-    updateTenantDropdown();
-    document.getElementById("tenantName").value = "";
-  }
-}
-
-function removeTenant() {
-  const select = document.getElementById("tenantSelect");
-  const selected = select.value;
-  if (selected) {
-    tenants = tenants.filter(t => t !== selected);
-    entries = entries.filter(e => e.tenant !== selected);
-    updateTenantDropdown();
-    updateCharts();
-  }
-}
-
-function updateTenantDropdown() {
-  const select = document.getElementById("tenantSelect");
-  select.innerHTML = "";
-  tenants.forEach(t => {
-    const option = document.createElement("option");
-    option.value = t;
-    option.textContent = t;
-    select.appendChild(option);
-  });
-}
-
-// --- Entry Functions ---
-function addEntry() {
-  const type = document.getElementById("type").value;
-  const amount = parseFloat(document.getElementById("amount").value);
-  const source = document.getElementById("source").value.trim();
-  const tenant = document.getElementById("tenantSelect").value;
-
-  if (!tenant) {
-    alert("Please select a tenant first.");
-    return;
-  }
-
-  if (!isNaN(amount) && amount > 0) {
-    entries.push({ type, amount, source, tenant });
-    document.getElementById("entryForm").reset();
-    updateCharts();
-  }
-}
-
-// --- Chart Functions ---
 function updateCharts() {
+  const ctx1 = document.getElementById("incomeExpenseChart").getContext("2d");
+  const ctx2 = document.getElementById("cashFlowChart").getContext("2d");
+
+  // destroy old charts if they exist
   if (incomeExpenseChart) incomeExpenseChart.destroy();
   if (cashFlowChart) cashFlowChart.destroy();
 
-  const tenantsList = [...new Set(entries.map(e => e.tenant))];
+  // Aggregate data
+  let income = 0, expenses = 0;
+  entries.forEach(e => {
+    if (e.type === "income") income += e.amount;
+    if (e.type === "expense") expenses += e.amount;
+  });
 
-  // Aggregate per tenant
-  const incomes = tenantsList.map(t =>
-    entries.filter(e => e.tenant === t && e.type === "income")
-           .reduce((a, b) => a + b.amount, 0)
-  );
-  const expenses = tenantsList.map(t =>
-    entries.filter(e => e.tenant === t && e.type === "expense")
-           .reduce((a, b) => a + b.amount, 0)
-  );
-
-  const ctx1 = document.getElementById("incomeExpenseChart").getContext("2d");
+  // Income vs Expense Chart
   incomeExpenseChart = new Chart(ctx1, {
     type: "bar",
     data: {
-      labels: tenantsList.length ? tenantsList : ["No Data"],
-      datasets: [
-        { label: "Income", data: incomes.length ? incomes : [0], backgroundColor: "green" },
-        { label: "Expenses", data: expenses.length ? expenses : [0], backgroundColor: "red" }
-      ]
+      labels: ["Income", "Expenses"],
+      datasets: [{
+        label: "Amount",
+        data: [income, expenses],
+        backgroundColor: ["#4caf50", "#f44336"]
+      }]
     },
-    options: { responsive: true, maintainAspectRatio: false }
+    options: { responsive: true }
   });
 
-  const ctx2 = document.getElementById("cashFlowChart").getContext("2d");
-  const netCashFlow = incomes.reduce((a, b) => a + b, 0) - expenses.reduce((a, b) => a + b, 0);
+  // Cash Flow (cumulative line chart)
+  let balance = 0;
+  const balances = entries.map(e => {
+    balance += (e.type === "income" ? e.amount : -e.amount);
+    return balance;
+  });
 
   cashFlowChart = new Chart(ctx2, {
     type: "line",
     data: {
-      labels: tenantsList.length ? tenantsList : ["No Data"],
-      datasets: [
-        { 
-          label: "Net Cash Flow", 
-          data: tenantsList.map((_, i) => incomes[i] - expenses[i]), 
-          borderColor: "gold", 
-          backgroundColor: "rgba(255,215,0,0.2)", 
-          fill: true 
-        }
-      ]
+      labels: entries.map((e, i) => `#${i+1}`),
+      datasets: [{
+        label: "Cash Flow",
+        data: balances,
+        borderColor: "#ffd700",
+        fill: false
+      }]
     },
-    options: { responsive: true, maintainAspectRatio: false }
-  });
-}
-
-// --- Session Functions ---
-function saveSession() {
-  const name = document.getElementById("sessionName").value.trim();
-  if (!name) return alert("Enter a session name.");
-  sessions[name] = { tenants: [...tenants], entries: [...entries] };
-  updateSessionDropdown();
-}
-
-function loadSession() {
-  const name = document.getElementById("sessionSelect").value;
-  if (!name || !sessions[name]) return alert("Select a session.");
-  tenants = [...sessions[name].tenants];
-  entries = [...sessions[name].entries];
-  updateTenantDropdown();
-  updateCharts();
-}
-
-function deleteSession() {
-  const name = document.getElementById("sessionSelect").value;
-  if (name && sessions[name]) {
-    delete sessions[name];
-    updateSessionDropdown();
-  }
-}
-
-function updateSessionDropdown() {
-  const select = document.getElementById("sessionSelect");
-  select.innerHTML = "";
-  Object.keys(sessions).forEach(s => {
-    const option = document.createElement("option");
-    option.value = s;
-    option.textContent = s;
-    select.appendChild(option);
+    options: { responsive: true }
   });
 }
