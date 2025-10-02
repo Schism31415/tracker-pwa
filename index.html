@@ -6,7 +6,6 @@
   <title>Premium Investor App</title>
   <link rel="stylesheet" href="styles2.css" />
   <link rel="manifest" href="manifest.json" />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
   <!-- Header -->
@@ -18,46 +17,50 @@
 
   <!-- Description -->
   <section class="description">
-    <p>Manage tenants, track income and expenses, and visualize financial performance.</p>
+    <p>Manage tenants, track income and expenses, and view your portfolio performance in real time.</p>
   </section>
 
   <!-- Tenant Management -->
   <section>
     <h2>Tenants</h2>
     <div class="tenant-actions">
-      <input type="text" id="tenantInput" placeholder="Enter tenant name" />
-      <button id="addTenant">Add Tenant</button>
-      <button id="removeTenant">Remove Tenant</button>
+      <input type="text" id="tenantName" placeholder="Enter tenant name" />
+      <button id="addTenantBtn">Add Tenant</button>
+      <button id="removeTenantBtn">Remove Tenant</button>
     </div>
-    <label for="tenant">Select Tenant</label>
-    <select id="tenant"></select>
+    <label for="tenantSelect">Select Tenant:</label>
+    <select id="tenantSelect"></select>
   </section>
 
-  <!-- Income Form -->
+  <!-- Entries -->
   <section>
-    <h2>Add Income</h2>
-    <form id="incomeForm">
-      <label for="incomeAmount">Amount</label>
-      <input type="number" id="incomeAmount" required />
-      <button type="submit">Add Income</button>
-    </form>
-  </section>
+    <h2>Entries</h2>
+    <form id="entryForm">
+      <label for="type">Type</label>
+      <select id="type">
+        <option value="income">Income</option>
+        <option value="expense">Expense</option>
+      </select>
 
-  <!-- Expense Form -->
-  <section>
-    <h2>Add Expense</h2>
-    <form id="expenseForm">
-      <label for="expenseAmount">Amount</label>
-      <input type="number" id="expenseAmount" required />
-      <button type="submit">Add Expense</button>
+      <label for="amount">Amount</label>
+      <input type="number" id="amount" placeholder="Enter amount" required />
+
+      <label for="source">Source / Category</label>
+      <input type="text" id="source" placeholder="E.g. Rent, Repairs" />
+
+      <button type="submit">Add Entry</button>
     </form>
   </section>
 
   <!-- Charts -->
   <section>
-    <h2>Performance Charts</h2>
-    <canvas id="incomeChart"></canvas>
-    <canvas id="expenseChart"></canvas>
+    <h2>Income vs Expenses</h2>
+    <canvas id="incomeExpenseChart" height="200"></canvas>
+  </section>
+
+  <section>
+    <h2>Cash Flow</h2>
+    <canvas id="cashFlowChart" height="200"></canvas>
   </section>
 
   <!-- Sessions -->
@@ -65,16 +68,15 @@
     <h2>Sessions</h2>
     <div class="session-actions">
       <input type="text" id="sessionName" placeholder="Session name" />
-      <button id="saveSession">Save Session</button>
-      <button id="loadSession">Load Session</button>
-      <button id="deleteSession">Delete Session</button>
+      <button id="saveSessionBtn">Save Session</button>
+      <button id="loadSessionBtn">Load Session</button>
+      <button id="deleteSessionBtn">Delete Session</button>
+      <select id="sessionSelect"></select>
     </div>
-    <label for="session">Saved Sessions</label>
-    <select id="session"></select>
   </section>
 
   <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="app-v4.js"></script>
 </body>
 </html>
-
