@@ -11,10 +11,10 @@
 <body>
   <header>
     <h1>🏡 Investor's 2-in-1 Property Profit Dashboard</h1>
-    <p class="subtitle">Track your rental income, expenses, tenants and renovations — with clarity and control.</p>
+    <p class="subtitle">Track rental income, expenses, tenants, and renovations with clarity and control.</p>
   </header>
 
-  <!-- Currency Selection -->
+  <!-- Currency -->
   <section class="currency-section">
     <label for="currency">Currency:</label>
     <select id="currency">
@@ -26,54 +26,55 @@
 
   <!-- Tenant Management -->
   <section>
-    <h2>Tenants</h2>
-    <input type="text" id="tenant-name" placeholder="Tenant name or unit">
+    <h2>Manage Tenants</h2>
+    <input type="text" id="tenant-name" placeholder="Tenant Name or Unit">
     <button id="add-tenant">Add Tenant</button>
     <ul id="tenant-list"></ul>
   </section>
 
-  <!-- Income Form -->
+  <!-- Income -->
   <section>
     <h2>Add Income</h2>
-    <select id="income-tenant">
-      <option value="">-- Select Tenant --</option>
-    </select>
-    <input type="text" id="income-source" placeholder="Source (e.g. Rent, Deposit)">
+    <select id="income-tenant"></select>
+    <input type="text" id="income-source" placeholder="Source (e.g. Rent)">
     <input type="number" id="income-amount" placeholder="Amount">
     <input type="date" id="income-date">
     <button id="add-income">Add Income</button>
     <ul id="income-list"></ul>
   </section>
 
-  <!-- Expense Form -->
+  <!-- Expense -->
   <section>
     <h2>Add Expense</h2>
-    <select id="expense-tenant">
-      <option value="">-- Select Tenant --</option>
-    </select>
-    <input type="text" id="expense-category" placeholder="Category (e.g. Repairs, Taxes)">
+    <select id="expense-tenant"></select>
+    <input type="text" id="expense-category" placeholder="Category (e.g. Repairs)">
     <input type="number" id="expense-amount" placeholder="Amount">
     <input type="date" id="expense-date">
     <button id="add-expense">Add Expense</button>
     <ul id="expense-list"></ul>
   </section>
 
-  <!-- Graphs -->
+  <!-- Charts -->
   <section class="charts">
     <h2>Performance Overview</h2>
     <canvas id="incomeChart"></canvas>
     <canvas id="expenseChart"></canvas>
   </section>
 
+  <!-- Tenant Summary -->
+  <section class="tenant-summary">
+    <h2>Tenant Summary</h2>
+    <div id="tenant-summary-cards" class="card-grid"></div>
+  </section>
+
   <!-- Sessions -->
   <section>
     <h2>Saved Sessions</h2>
     <button id="save-session">💾 Save Current Session</button>
-    <button id="export-csv">⬇️ Export CSV</button>
+    <button id="export-csv">📂 Export CSV</button>
     <ul id="session-list"></ul>
   </section>
 
-  <!-- Status -->
   <footer>
     <p id="save-status">All changes saved</p>
   </footer>
