@@ -1,12 +1,12 @@
 {
-  "name": "Investor Dashboard",
-  "short_name": "Investor",
-  "description": "Track rental property income, expenses, tenants, and cashflow with ease.",
-  "start_url": "./index.html",
+  "name": "Investor Pro Dashboard",
+  "short_name": "InvestorPro",
+  "description": "Track rental cash flow & renovation budgets with ease.",
+  "start_url": "index.html",
   "display": "standalone",
-  "background_color": "#0d1117",
-  "theme_color": "#0d1117",
-  "orientation": "portrait-primary",
+  "background_color": "#ffffff",
+  "theme_color": "#1d3557",
+  "orientation": "portrait",
   "icons": [
     {
       "src": "icons/icon-192.png",
