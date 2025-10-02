@@ -1,231 +1,218 @@
-// ====== GLOBAL STATE ======
-let tenants = JSON.parse(localStorage.getItem("tenants")) || [];
-let entries = JSON.parse(localStorage.getItem("entries")) || [];
-let currentCurrency = "£";
+// ===== Investor Pro App.js =====
 
-// ====== ELEMENTS ======
-const tenantForm = document.getElementById("tenant-form");
-const tenantNameInput = document.getElementById("tenant-name");
-const tenantList = document.getElementById("tenant-list");
-const tenantSelect = document.getElementById("tenant-select");
+// ---- Global Variables ----
+let tenants = [];
+let sessions = JSON.parse(localStorage.getItem("sessions")) || {};
+let currentSession = null;
 
-const entryForm = document.getElementById("entry-form");
-const amountInput = document.getElementById("amount");
-const typeSelect = document.getElementById("type");
+// ---- DOM Elements ----
+const incomeForm = document.getElementById("income-form");
+const expenseForm = document.getElementById("expense-form");
+const tenantSelects = document.querySelectorAll(".tenant-select");
+const addTenantBtn = document.getElementById("add-tenant-btn");
+const tenantNameInput = document.getElementById("tenant-name-input");
+
+const chartCanvas = document.getElementById("financeChart").getContext("2d");
+const saveSessionBtn = document.getElementById("save-session-btn");
+const loadSessionSelect = document.getElementById("load-session-select");
+const loadSessionBtn = document.getElementById("load-session-btn");
+const deleteSessionBtn = document.getElementById("delete-session-btn");
+const exportCSVBtn = document.getElementById("export-csv-btn");
+const exportChartBtn = document.getElementById("export-chart-btn");
+
 const currencySelect = document.getElementById("currency-select");
-const entriesTableBody = document.querySelector("#entries-table tbody");
 
-const saveSessionBtn = document.getElementById("save-session");
-const loadSessionBtn = document.getElementById("load-session");
-const deleteSessionBtn = document.getElementById("delete-session");
-const exportCsvBtn = document.getElementById("export-csv");
-const exportChartBtn = document.getElementById("export-chart");
+// ---- Chart Setup ----
+let chartData = {
+  labels: [],
+  datasets: [
+    {
+      label: "Income",
+      data: [],
+      borderColor: "green",
+      backgroundColor: "rgba(0,200,0,0.3)",
+      fill: true,
+      tension: 0.4
+    },
+    {
+      label: "Expenses",
+      data: [],
+      borderColor: "red",
+      backgroundColor: "rgba(200,0,0,0.3)",
+      fill: true,
+      tension: 0.4
+    }
+  ]
+};
 
-let financeChart;
-
-// ====== INIT ======
-document.addEventListener("DOMContentLoaded", () => {
-  renderTenants();
-  renderEntries();
-  updateChart();
+let financeChart = new Chart(chartCanvas, {
+  type: "line",
+  data: chartData,
+  options: {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: "top"
+      }
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          callback: function(value) {
+            return currencySelect.value + value;
+          }
+        }
+      }
+    }
+  }
 });
 
-// ====== TENANTS ======
-tenantForm.addEventListener("submit", (e) => {
-  e.preventDefault();
+// ---- Functions ----
+function updateTenantSelects() {
+  tenantSelects.forEach(select => {
+    select.innerHTML = "";
+    tenants.forEach(t => {
+      const opt = document.createElement("option");
+      opt.value = t;
+      opt.textContent = t;
+      select.appendChild(opt);
+    });
+  });
+}
+
+function addTenant() {
   const tenantName = tenantNameInput.value.trim();
   if (tenantName && !tenants.includes(tenantName)) {
     tenants.push(tenantName);
-    localStorage.setItem("tenants", JSON.stringify(tenants));
+    updateTenantSelects();
     tenantNameInput.value = "";
-    renderTenants();
   }
-});
-
-function renderTenants() {
-  // Update tenant list
-  tenantList.innerHTML = "";
-  tenants.forEach((tenant) => {
-    const li = document.createElement("li");
-    li.textContent = tenant;
-
-    const removeBtn = document.createElement("button");
-    removeBtn.textContent = "Remove";
-    removeBtn.onclick = () => {
-      tenants = tenants.filter((t) => t !== tenant);
-      localStorage.setItem("tenants", JSON.stringify(tenants));
-      renderTenants();
-      renderEntries();
-    };
-
-    li.appendChild(removeBtn);
-    tenantList.appendChild(li);
-  });
-
-  // Update tenant dropdown
-  tenantSelect.innerHTML = `<option value="">Select tenant</option>`;
-  tenants.forEach((tenant) => {
-    const option = document.createElement("option");
-    option.value = tenant;
-    option.textContent = tenant;
-    tenantSelect.appendChild(option);
-  });
 }
 
-// ====== ENTRIES ======
-entryForm.addEventListener("submit", (e) => {
-  e.preventDefault();
-  const tenant = tenantSelect.value;
-  const amount = parseFloat(amountInput.value);
-  const type = typeSelect.value;
-  const currency = currencySelect.value;
+function addData(label, income, expense) {
+  chartData.labels.push(label);
+  chartData.datasets[0].data.push(income);
+  chartData.datasets[1].data.push(expense);
+  financeChart.update();
+}
 
-  if (!tenant || isNaN(amount)) return;
+function saveSession() {
+  const sessionName = prompt("Enter session name:");
+  if (!sessionName) return;
 
-  const entry = {
-    tenant,
-    amount,
-    type,
-    currency,
-    date: new Date().toLocaleDateString(),
+  const data = {
+    tenants,
+    chartData,
+    currency: currencySelect.value
   };
 
-  entries.push(entry);
-  localStorage.setItem("entries", JSON.stringify(entries));
-  renderEntries();
-  updateChart();
-
-  entryForm.reset();
-});
-
-function renderEntries() {
-  entriesTableBody.innerHTML = "";
-  entries.forEach((entry, index) => {
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td>${entry.tenant}</td>
-      <td>${entry.type}</td>
-      <td>${entry.amount.toFixed(2)}</td>
-      <td>${entry.currency}</td>
-      <td>${entry.date}</td>
-      <td><button onclick="deleteEntry(${index})">Remove</button></td>
-    `;
-    entriesTableBody.appendChild(row);
-  });
+  sessions[sessionName] = data;
+  localStorage.setItem("sessions", JSON.stringify(sessions));
+  refreshSessionList();
+  currentSession = sessionName;
+  alert("Session saved.");
 }
 
-function deleteEntry(index) {
-  entries.splice(index, 1);
-  localStorage.setItem("entries", JSON.stringify(entries));
-  renderEntries();
-  updateChart();
-}
+function loadSession() {
+  const sessionName = loadSessionSelect.value;
+  if (!sessionName) return;
 
-// ====== SESSIONS ======
-saveSessionBtn.addEventListener("click", () => {
-  localStorage.setItem("savedSession", JSON.stringify(entries));
-  alert("Session saved!");
-});
+  const data = sessions[sessionName];
+  tenants = data.tenants;
+  chartData = data.chartData;
+  currencySelect.value = data.currency;
 
-loadSessionBtn.addEventListener("click", () => {
-  const saved = JSON.parse(localStorage.getItem("savedSession"));
-  if (saved) {
-    entries = saved;
-    localStorage.setItem("entries", JSON.stringify(entries));
-    renderEntries();
-    updateChart();
-    alert("Session loaded!");
-  } else {
-    alert("No saved session found.");
-  }
-});
-
-deleteSessionBtn.addEventListener("click", () => {
-  localStorage.removeItem("savedSession");
-  alert("Saved session deleted.");
-});
-
-// ====== EXPORT CSV ======
-exportCsvBtn.addEventListener("click", () => {
-  if (!entries.length) {
-    alert("No data to export.");
-    return;
-  }
-
-  let csvContent = "data:text/csv;charset=utf-8,";
-  csvContent += "Tenant,Type,Amount,Currency,Date\n";
-  entries.forEach((e) => {
-    csvContent += `${e.tenant},${e.type},${e.amount},${e.currency},${e.date}\n`;
-  });
-
-  const encodedUri = encodeURI(csvContent);
-  const link = document.createElement("a");
-  link.setAttribute("href", encodedUri);
-  link.setAttribute("download", "finance_report.csv");
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-});
-
-// ====== EXPORT CHART (PNG) ======
-exportChartBtn.addEventListener("click", () => {
-  if (!financeChart) {
-    alert("No chart available to export.");
-    return;
-  }
-  const link = document.createElement("a");
-  link.href = financeChart.toBase64Image();
-  link.download = "finance_chart.png";
-  link.click();
-});
-
-// ====== CHART ======
-function updateChart() {
-  const labels = entries.map((e) => e.date);
-  const incomeData = entries.map((e) => (e.type === "income" ? e.amount : 0));
-  const expenseData = entries.map((e) => (e.type === "expense" ? e.amount : 0));
-
-  const ctx = document.getElementById("financeChart").getContext("2d");
-  if (financeChart) financeChart.destroy();
-
-  financeChart = new Chart(ctx, {
+  financeChart.destroy();
+  financeChart = new Chart(chartCanvas, {
     type: "line",
-    data: {
-      labels,
-      datasets: [
-        {
-          label: "Income",
-          data: incomeData,
-          borderColor: "#28a745",
-          backgroundColor: "rgba(40,167,69,0.2)",
-          fill: true,
-          tension: 0.4,
-        },
-        {
-          label: "Expenses",
-          data: expenseData,
-          borderColor: "#dc3545",
-          backgroundColor: "rgba(220,53,69,0.2)",
-          fill: true,
-          tension: 0.4,
-        },
-      ],
-    },
+    data: chartData,
     options: {
       responsive: true,
       plugins: {
-        legend: { position: "bottom" },
+        legend: { position: "top" }
       },
       scales: {
         y: {
           beginAtZero: true,
           ticks: {
-            callback: function (value) {
-              return currentCurrency + value;
-            },
-          },
-        },
-      },
-    },
+            callback: function(value) {
+              return currencySelect.value + value;
+            }
+          }
+        }
+      }
+    }
+  });
+
+  updateTenantSelects();
+  alert("Session loaded.");
+}
+
+function deleteSession() {
+  const sessionName = loadSessionSelect.value;
+  if (!sessionName) return;
+
+  delete sessions[sessionName];
+  localStorage.setItem("sessions", JSON.stringify(sessions));
+  refreshSessionList();
+  alert("Session deleted.");
+}
+
+function refreshSessionList() {
+  loadSessionSelect.innerHTML = "";
+  Object.keys(sessions).forEach(name => {
+    const opt = document.createElement("option");
+    opt.value = name;
+    opt.textContent = name;
+    loadSessionSelect.appendChild(opt);
   });
 }
+
+function exportCSV() {
+  let csv = "Label,Income,Expenses\n";
+  chartData.labels.forEach((label, i) => {
+    csv += `${label},${chartData.datasets[0].data[i]},${chartData.datasets[1].data[i]}\n`;
+  });
+
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "finance_data.csv";
+  a.click();
+}
+
+function exportChart() {
+  const link = document.createElement("a");
+  link.href = financeChart.toBase64Image();
+  link.download = "finance_chart.png";
+  link.click();
+}
+
+// ---- Event Listeners ----
+addTenantBtn.addEventListener("click", addTenant);
+
+incomeForm.addEventListener("submit", e => {
+  e.preventDefault();
+  const tenant = incomeForm.querySelector(".tenant-select").value;
+  const amount = parseFloat(incomeForm.querySelector("input[name='amount']").value);
+  if (tenant && amount) {
+    addData(`${tenant} Income`, amount, 0);
+    incomeForm.reset();
+  }
+});
+
+expenseForm.addEventListener("submit", e => {
+  e.preventDefault();
+  const tenant = expenseForm.querySelector(".tenant-select").value;
+  const amount = parseFloat(expenseForm.querySelector("input[name='amount']").value);
+  if (tenant && amount) {
+    addData(`${tenant} Expense`, 0, amount);
+    expenseForm.reset();
+  }
+});
+
+saveSessionBtn.addEventListener("click", saveSession);
+loadSessionBtn.addEventListener("clic
