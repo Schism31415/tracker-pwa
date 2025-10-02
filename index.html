@@ -1,84 +1,96 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Investor Dashboard</title>
-  <link rel="stylesheet" href="styles.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Investor Premium App</title>
 
-  <!-- PWA -->
+  <!-- Manifest for PWA -->
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#0d1117" />
+  <meta name="theme-color" content="#003366">
 
-  <!-- Icons -->
-  <link rel="icon" href="icons/icon-192.png" sizes="192x192" />
-  <link rel="apple-touch-icon" href="icons/icon-512.png" />
+  <!-- Styles -->
+  <link rel="stylesheet" href="styles.css">
 
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- jsPDF for PDF Export -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
-  <!-- HEADER -->
-  <header class="app-header">
-    <div class="header-content">
-      <img src="icons/icon-192.png" alt="App Logo" class="app-logo" />
-      <h1 class="app-title">Investor Dashboard</h1>
-      <p class="app-tagline">Track income, expenses, tenants, and cashflow in one place</p>
-    </div>
+  <!-- ===== Header ===== -->
+  <header>
+    <img src="icons/app-icon.png" alt="App Icon">
+    <h1>Investor Premium</h1>
+    <p>Track income, expenses, and tenants in one place</p>
   </header>
 
-  <main class="container">
-    <!-- Currency -->
-    <section>
-      <label for="currency-select">Currency:</label>
-      <select id="currency-select"></select>
-    </section>
+  <!-- ===== Main Container ===== -->
+  <div class="container">
 
-    <!-- TENANTS -->
+    <!-- Tenant Management -->
     <section>
       <h2>Manage Tenants</h2>
-      <div>
-        <input id="new-tenant" type="text" placeholder="Enter tenant name" />
-        <button id="add-tenant">Add Tenant</button>
-      </div>
+      <form id="tenant-form">
+        <input type="text" id="tenant-name" placeholder="Tenant name" required>
+        <button type="submit">Add Tenant</button>
+      </form>
       <ul id="tenant-list"></ul>
     </section>
 
-    <!-- INCOME -->
+    <!-- Add Income/Expense -->
     <section>
-      <h2>Add Income</h2>
-      <form id="income-form">
-        <label>Amount</label>
-        <input id="income-amount" type="number" step="0.01" required />
-        
-        <label>Source</label>
-        <input id="income-source" type="text" required />
-
-        <label>Tenant</label>
-        <select id="income-tenant" class="tenant-select"></select>
-
-        <button type="submit">Add Income</button>
+      <h2>Record Income / Expense</h2>
+      <form id="entry-form">
+        <select id="tenant-select" required>
+          <option value="">Select tenant</option>
+        </select>
+        <select id="currency-select" required>
+          <option value="£">£ (GBP)</option>
+          <option value="$">$ (USD)</option>
+          <option value="€">€ (EUR)</option>
+        </select>
+        <input type="number" id="amount" placeholder="Amount" required>
+        <select id="type" required>
+          <option value="income">Income</option>
+          <option value="expense">Expense</option>
+        </select>
+        <button type="submit">Add Entry</button>
       </form>
-      <table>
+      <table id="entries-table">
         <thead>
           <tr>
-            <th>Date</th>
-            <th>Source</th>
             <th>Tenant</th>
+            <th>Type</th>
             <th>Amount</th>
+            <th>Currency</th>
+            <th>Date</th>
+            <th>Action</th>
           </tr>
         </thead>
-        <tbody id="income-table-body"></tbody>
+        <tbody></tbody>
       </table>
     </section>
 
-    <!-- EXPENSES -->
+    <!-- Session Management -->
     <section>
-      <h2>Add Expense</h2>
-      <form id="expense-form">
-        <label>Amount</label>
-        <input id="expense-amount" type="number" step="0.01" required />
-        
-        <label>Category</labe
+      <h2>Sessions</h2>
+      <div class="actions">
+        <button id="save-session">Save Session</button>
+        <button id="load-session">Load Session</button>
+        <button id="delete-session">Delete Session</button>
+        <button id="export-csv">Export CSV</button>
+        <button id="export-pdf">Export PDF</button>
+      </div>
+    </section>
+
+    <!-- Charts -->
+    <section>
+      <h2>Performance Overview</h2>
+      <canvas id="financeChart"></canvas>
+    </section>
+
+  </div>
+
+  <!-- ===== JS ===== -->
+  <script src="app.js"></script>
+</body>
+</html>
