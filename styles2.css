@@ -8,15 +8,17 @@
 
 /* Body */
 body {
-  background: #121212;
+  background: #121212; /* deep black background */
   color: #f1f1f1;
   line-height: 1.6;
+  padding: 0;
+  margin: 0;
 }
 
 /* Header */
 .app-header {
   background: linear-gradient(135deg, #000000, #1a1a1a);
-  color: #ffd700;
+  color: #ffd700; /* gold */
   text-align: center;
   padding: 20px 10px;
   border-bottom: 3px solid #ffd700;
@@ -43,7 +45,7 @@ body {
 
 /* Sections */
 section {
-  background: #1e1e1e;
+  background: #1e1e1e; /* dark card */
   margin: 20px auto;
   padding: 20px;
   border-radius: 12px;
@@ -93,7 +95,7 @@ button {
 }
 
 button:hover {
-  background: #e6c200;
+  background: #e6c200; /* darker gold */
 }
 
 /* Tenant section */
