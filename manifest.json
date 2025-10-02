@@ -1,11 +1,11 @@
 {
-  "name": "Investor's 2-in-1 Property Profit Dashboard",
-  "short_name": "Investor Dashboard",
-  "description": "Track rental cash flow and renovation budgets with clarity and confidence.",
-  "start_url": "index.html",
+  "name": "Investor Dashboard",
+  "short_name": "Investor",
+  "description": "Track rental property cash-flow and renovation budgets with ease.",
+  "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#0f1116",
-  "theme_color": "#0f1116",
+  "background_color": "#0d0d0d",
+  "theme_color": "#ffd700",
   "orientation": "portrait",
   "icons": [
     {
