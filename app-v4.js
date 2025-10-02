@@ -18,6 +18,9 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("saveSessionBtn").addEventListener("click", saveSession);
   document.getElementById("loadSessionBtn").addEventListener("click", loadSession);
   document.getElementById("deleteSessionBtn").addEventListener("click", deleteSession);
+
+  // ✅ Draw empty charts on first load
+  updateCharts();
 });
 
 // --- Tenant Functions ---
@@ -76,18 +79,26 @@ function updateCharts() {
   if (incomeExpenseChart) incomeExpenseChart.destroy();
   if (cashFlowChart) cashFlowChart.destroy();
 
-  const incomes = entries.filter(e => e.type === "income").map(e => e.amount);
-  const expenses = entries.filter(e => e.type === "expense").map(e => e.amount);
-  const labels = entries.map(e => e.tenant || "Unknown");
+  const tenantsList = [...new Set(entries.map(e => e.tenant))];
+
+  // Aggregate per tenant
+  const incomes = tenantsList.map(t =>
+    entries.filter(e => e.tenant === t && e.type === "income")
+           .reduce((a, b) => a + b.amount, 0)
+  );
+  const expenses = tenantsList.map(t =>
+    entries.filter(e => e.tenant === t && e.type === "expense")
+           .reduce((a, b) => a + b.amount, 0)
+  );
 
   const ctx1 = document.getElementById("incomeExpenseChart").getContext("2d");
   incomeExpenseChart = new Chart(ctx1, {
     type: "bar",
     data: {
-      labels: labels,
+      labels: tenantsList.length ? tenantsList : ["No Data"],
       datasets: [
-        { label: "Income", data: incomes, backgroundColor: "green" },
-        { label: "Expenses", data: expenses, backgroundColor: "red" }
+        { label: "Income", data: incomes.length ? incomes : [0], backgroundColor: "green" },
+        { label: "Expenses", data: expenses.length ? expenses : [0], backgroundColor: "red" }
       ]
     },
     options: { responsive: true, maintainAspectRatio: false }
@@ -99,9 +110,15 @@ function updateCharts() {
   cashFlowChart = new Chart(ctx2, {
     type: "line",
     data: {
-      labels: ["Net Cash Flow"],
+      labels: tenantsList.length ? tenantsList : ["No Data"],
       datasets: [
-        { label: "Cash Flow", data: [netCashFlow], borderColor: "gold", backgroundColor: "rgba(255,215,0,0.2)", fill: true }
+        { 
+          label: "Net Cash Flow", 
+          data: tenantsList.map((_, i) => incomes[i] - expenses[i]), 
+          borderColor: "gold", 
+          backgroundColor: "rgba(255,215,0,0.2)", 
+          fill: true 
+        }
       ]
     },
     options: { responsive: true, maintainAspectRatio: false }
