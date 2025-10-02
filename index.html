@@ -1,86 +1,87 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Investor Dashboard</title>
-  <link rel="stylesheet" href="styles2.css">
-  <link rel="manifest" href="manifest.json">
-  <link rel="icon" href="icons/icon-192.png" type="image/png">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Investor’s 2-in-1 Property Dashboard</title>
+  <link rel="stylesheet" href="styles2.css" />
+  <link rel="manifest" href="manifest.json" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
   <header>
-    <div class="header-logo">
-      <img src="icons/icon-192.png" alt="App Logo" class="logo">
-      <h1>Investor Dashboard</h1>
+    <div class="header-content">
+      <img src="icons/app-icon-192.png" alt="App Icon" class="logo">
+      <h1>The Investor’s 2-in-1 Property Profit Dashboard</h1>
+      <p class="subtitle">Track rental income, expenses, and renovation budgets in one place.</p>
     </div>
-    <p class="tagline">Track your income, expenses, and tenants with ease</p>
   </header>
 
   <main>
-    <section class="form-section">
-      <h2>Add Entry</h2>
-      <form id="entry-form">
-        <label for="tenant">Tenant</label>
-        <select id="tenant" name="tenant">
-          <option value="">Select Tenant</option>
-        </select>
-        <button type="button" id="add-tenant-btn">+ Add Tenant</button>
-
-        <label for="type">Type</label>
-        <select id="type" name="type">
-          <option value="income">Income</option>
-          <option value="expense">Expense</option>
-        </select>
-
-        <label for="source">Source</label>
-        <select id="source" name="source">
-          <option value="rent">Rent</option>
-          <option value="utilities">Utilities</option>
-          <option value="maintenance">Maintenance</option>
-          <option value="other">Other</option>
-        </select>
-
-        <label for="currency">Currency</label>
-        <select id="currency" name="currency">
-          <option value="£">GBP (£)</option>
-          <option value="$">USD ($)</option>
-          <option value="€">EUR (€)</option>
-        </select>
-
-        <label for="amount">Amount</label>
-        <input type="number" id="amount" name="amount" required>
-
-        <button type="submit">Add Entry</button>
-      </form>
+    <!-- Tenant Management -->
+    <section>
+      <h2>Tenant Management</h2>
+      <input type="text" id="tenant-name" placeholder="Enter tenant name">
+      <button id="add-tenant-btn">Add Tenant</button>
+      <ul id="tenant-list"></ul>
     </section>
 
-    <section class="sessions">
+    <!-- Currency Selector -->
+    <section>
+      <h2>Currency</h2>
+      <select id="currency-select">
+        <option value="£">£ (GBP)</option>
+        <option value="$">$ (USD)</option>
+        <option value="€">€ (EUR)</option>
+      </select>
+    </section>
+
+    <!-- Income Form -->
+    <section>
+      <h2>Add Income</h2>
+      <input type="number" id="income-amount" placeholder="Amount">
+      <input type="text" id="income-source" placeholder="Source (Rent, Deposit, etc)">
+      <select id="income-tenant" class="tenant-select"></select>
+      <button onclick="addEntry('income')">Add Income</button>
+    </section>
+
+    <!-- Expense Form -->
+    <section>
+      <h2>Add Expense</h2>
+      <input type="number" id="expense-amount" placeholder="Amount">
+      <input type="text" id="expense-source" placeholder="Source (Mortgage, Insurance, etc)">
+      <select id="expense-tenant" class="tenant-select"></select>
+      <button onclick="addEntry('expense')">Add Expense</button>
+    </section>
+
+    <!-- Entries Table -->
+    <section>
+      <h2>All Entries</h2>
+      <table id="entries-table"></table>
+    </section>
+
+    <!-- Charts -->
+    <section>
+      <h2>Performance Overview</h2>
+      <canvas id="income-chart"></canvas>
+      <canvas id="expense-chart"></canvas>
+    </section>
+
+    <!-- Sessions -->
+    <section>
       <h2>Sessions</h2>
-      <div id="sessions-list"></div>
       <button id="save-session-btn">Save Session</button>
-      <button id="load-session-btn">Load Session</button>
-      <button id="delete-session-btn">Delete Session</button>
+      <ul id="session-list"></ul>
     </section>
 
-    <section class="charts">
-      <h2>Overview</h2>
-      <canvas id="incomeChart"></canvas>
-      <canvas id="expenseChart"></canvas>
-    </section>
-
-    <section class="exports">
+    <!-- Export -->
+    <section>
       <h2>Export Data</h2>
       <button id="export-csv-btn">Export CSV</button>
       <button id="export-pdf-btn">Export PDF</button>
     </section>
   </main>
 
-  <footer>
-    <p>&copy; 2025 Investor App — Premium Edition</p>
-  </footer>
-
   <script src="app.js"></script>
 </body>
 </html>
-
