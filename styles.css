@@ -132,4 +132,40 @@ footer {
   color: #888;
   margin-top: 2rem;
 }
+
+/* Premium Header Styling */
+.app-header {
+  background: linear-gradient(135deg, #0d1117, #1f6feb);
+  color: #ffffff;
+  padding: 2rem 1rem;
+  text-align: center;
+  border-bottom: 4px solid #0d74e7;
+}
+
+.header-content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.app-logo {
+  width: 96px;
+  height: 96px;
+  border-radius: 24px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.4);
+  margin-bottom: 1rem;
+}
+
+.app-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin: 0.5rem 0;
+}
+
+.app-tagline {
+  font-size: 1rem;
+  color: #d1d5db;
+  line-height: 1.6;
+}
+
 ```
+
