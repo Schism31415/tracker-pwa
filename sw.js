@@ -1,54 +1,42 @@
-```javascript
-// sw.js - Service Worker with cache-busting version
-const CACHE_NAME = "investor-dashboard-v3"; // bump this version whenever you update
-const FILES_TO_CACHE = [
+// sw.js — Service Worker for Investor Dashboard
+const CACHE_NAME = "investor-dashboard-v5"; // bump this each time you update
+const urlsToCache = [
   "/",
   "/index.html",
-  "/app.js",
   "/styles.css",
+  "/app.js",
   "/manifest.json",
   "/icons/icon-192.png",
   "/icons/icon-512.png"
 ];
 
-// Install: pre-cache app shell
+// Install
 self.addEventListener("install", event => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
-      return cache.addAll(FILES_TO_CACHE);
+      return cache.addAll(urlsToCache);
     })
   );
-  self.skipWaiting();
 });
 
-// Activate: clear old caches
+// Activate (clear old caches)
 self.addEventListener("activate", event => {
   event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(
-        keys.map(key => {
-          if (key !== CACHE_NAME) {
-            return caches.delete(key);
-          }
-        })
-      )
-    )
+    caches.keys().then(cacheNames => {
+      return Promise.all(
+        cacheNames
+          .filter(name => name !== CACHE_NAME)
+          .map(name => caches.delete(name))
+      );
+    })
   );
-  self.clients.claim();
 });
 
-// Fetch: network first, fallback to cache
+// Fetch
 self.addEventListener("fetch", event => {
   event.respondWith(
-    fetch(event.request)
-      .then(response => {
-        // fresh copy to cache
-        return caches.open(CACHE_NAME).then(cache => {
-          cache.put(event.request, response.clone());
-          return response;
-        });
-      })
-      .catch(() => caches.match(event.request))
+    caches.match(event.request).then(response => {
+      return response || fetch(event.request);
+    })
   );
 });
-```
