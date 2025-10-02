@@ -1,84 +1,85 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Investor's 2-in-1 Property Profit Dashboard</title>
-  <link rel="stylesheet" href="styles.css">
-  <link rel="manifest" href="manifest.json">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Investor Dashboard</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="manifest" href="manifest.json" />
 </head>
 <body>
   <header>
-    <h1>🏡 Investor's 2-in-1 Property Profit Dashboard</h1>
-    <p class="subtitle">Track rental income, expenses, tenants, and renovations with clarity and control.</p>
+    Investor Dashboard
+    <p style="font-size:0.9rem; font-weight:400; color:#f0f0f0; margin-top:0.5rem;">
+      Track cashflow, tenants, and financial performance in one premium app.
+    </p>
   </header>
 
-  <!-- Currency -->
-  <section class="currency-section">
-    <label for="currency">Currency:</label>
-    <select id="currency">
-      <option value="£">£ (GBP)</option>
-      <option value="$">$ (USD)</option>
-      <option value="€">€ (EUR)</option>
-    </select>
-  </section>
+  <div class="container">
+    <!-- Income & Expense Form -->
+    <div class="card">
+      <h2>Add Entry</h2>
+      <form id="entry-form">
+        <label for="tenant">Tenant</label>
+        <select id="tenant" required>
+          <option value="">Select tenant</option>
+        </select>
+        <button type="button" id="add-tenant">+ Add Tenant</button>
 
-  <!-- Tenant Management -->
-  <section>
-    <h2>Manage Tenants</h2>
-    <input type="text" id="tenant-name" placeholder="Tenant Name or Unit">
-    <button id="add-tenant">Add Tenant</button>
-    <ul id="tenant-list"></ul>
-  </section>
+        <label for="type">Type</label>
+        <select id="type" required>
+          <option value="income">Income</option>
+          <option value="expense">Expense</option>
+        </select>
 
-  <!-- Income -->
-  <section>
-    <h2>Add Income</h2>
-    <select id="income-tenant"></select>
-    <input type="text" id="income-source" placeholder="Source (e.g. Rent)">
-    <input type="number" id="income-amount" placeholder="Amount">
-    <input type="date" id="income-date">
-    <button id="add-income">Add Income</button>
-    <ul id="income-list"></ul>
-  </section>
+        <label for="amount">Amount</label>
+        <input type="number" id="amount" placeholder="Enter amount" required />
 
-  <!-- Expense -->
-  <section>
-    <h2>Add Expense</h2>
-    <select id="expense-tenant"></select>
-    <input type="text" id="expense-category" placeholder="Category (e.g. Repairs)">
-    <input type="number" id="expense-amount" placeholder="Amount">
-    <input type="date" id="expense-date">
-    <button id="add-expense">Add Expense</button>
-    <ul id="expense-list"></ul>
-  </section>
+        <label for="currency">Currency</label>
+        <select id="currency" required>
+          <option value="USD">$ USD</option>
+          <option value="EUR">€ EUR</option>
+          <option value="GBP">£ GBP</option>
+        </select>
 
-  <!-- Charts -->
-  <section class="charts">
-    <h2>Performance Overview</h2>
-    <canvas id="incomeChart"></canvas>
-    <canvas id="expenseChart"></canvas>
-  </section>
+        <label for="source">Source / Category</label>
+        <input type="text" id="source" placeholder="e.g. Rent, Utilities" required />
 
-  <!-- Tenant Summary -->
-  <section class="tenant-summary">
-    <h2>Tenant Summary</h2>
-    <div id="tenant-summary-cards" class="card-grid"></div>
-  </section>
+        <label for="date">Date</label>
+        <input type="date" id="date" required />
 
-  <!-- Sessions -->
-  <section>
-    <h2>Saved Sessions</h2>
-    <button id="save-session">💾 Save Current Session</button>
-    <button id="export-csv">📂 Export CSV</button>
-    <ul id="session-list"></ul>
-  </section>
+        <button type="submit">Add Entry</button>
+      </form>
+    </div>
+
+    <!-- Chart Section -->
+    <div class="card">
+      <h2>Performance Overview</h2>
+      <div class="chart-container">
+        <canvas id="cashflowChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Session Controls -->
+    <div class="card">
+      <h2>Sessions</h2>
+      <div class="session-controls">
+        <button id="save-session">Save Session</button>
+        <button id="load-session">Load Session</button>
+        <button id="delete-session">Delete Session</button>
+        <button id="export-csv">Export CSV</button>
+        <button id="export-graph">Export Graph</button>
+      </div>
+    </div>
+  </div>
 
   <footer>
-    <p id="save-status">All changes saved</p>
+    &copy; 2025 Investor Dashboard — Designed with premium performance in mind
   </footer>
 
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
+```
