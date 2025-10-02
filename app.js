@@ -1,90 +1,141 @@
-// ----------------- Data Storage -----------------
-let entries = [];
+// ==========================
+// Global Currency Handling
+// ==========================
+let currencySymbol = localStorage.getItem("currencySymbol") || "$";
+document.getElementById("currencySelector").value = currencySymbol;
 
-// ----------------- Chart Setup -----------------
-const ctx = document.getElementById('cashflowChart').getContext('2d');
-let cashflowChart = new Chart(ctx, {
-  type: 'line',
-  data: {
-    labels: [],
-    datasets: [{
-      label: 'Net Cash Flow ($)',
+function updateCurrencyLabels() {
+  document.querySelectorAll(".currency-output").forEach(el => {
+    el.textContent = currencySymbol;
+  });
+}
+
+document.getElementById("currencySelector").addEventListener("change", (e) => {
+  currencySymbol = e.target.value;
+  localStorage.setItem("currencySymbol", currencySymbol);
+  updateCurrencyLabels();
+  updateCharts();
+});
+
+updateCurrencyLabels();
+
+// ==========================
+// Cash Flow Tracker
+// ==========================
+const cashFlowCtx = document.getElementById("cashFlowChart").getContext("2d");
+let cashFlowData = {
+  labels: [],
+  datasets: [
+    {
+      label: "Income",
       data: [],
-      borderColor: '#00ff88',
-      backgroundColor: 'rgba(0, 255, 136, 0.2)',
-      borderWidth: 2,
+      borderColor: "green",
+      backgroundColor: "rgba(0,255,0,0.2)",
       fill: true,
-      tension: 0.3,
-      pointBackgroundColor: '#ffd700'
-    }]
-  },
+      tension: 0.3
+    },
+    {
+      label: "Expenses",
+      data: [],
+      borderColor: "red",
+      backgroundColor: "rgba(255,0,0,0.2)",
+      fill: true,
+      tension: 0.3
+    }
+  ]
+};
+
+let cashFlowChart = new Chart(cashFlowCtx, {
+  type: "line",
+  data: cashFlowData,
   options: {
     responsive: true,
     plugins: {
-      legend: {
-        labels: {
-          color: '#f5f5f5'
+      tooltip: {
+        callbacks: {
+          label: (context) => `${currencySymbol}${context.formattedValue}`
         }
       }
+    }
+  }
+});
+
+document.getElementById("cashFlowForm").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const income = parseFloat(document.getElementById("income").value) || 0;
+  const expense = parseFloat(document.getElementById("expense").value) || 0;
+  const category = document.getElementById("expenseCategory").value;
+
+  let month = `Month ${cashFlowData.labels.length + 1}`;
+  cashFlowData.labels.push(month);
+  cashFlowData.datasets[0].data.push(income);
+  cashFlowData.datasets[1].data.push(expense);
+
+  cashFlowChart.update();
+  e.target.reset();
+});
+
+// ==========================
+// Renovation Tracker
+// ==========================
+const renoCtx = document.getElementById("renoChart").getContext("2d");
+let renoData = {
+  labels: [],
+  datasets: [
+    {
+      label: "Budget",
+      data: [],
+      borderColor: "blue",
+      backgroundColor: "rgba(0,0,255,0.2)",
+      fill: true,
+      tension: 0.3
     },
-    scales: {
-      x: {
-        ticks: { color: '#ccc' },
-        grid: { color: '#2a2d3a' }
-      },
-      y: {
-        ticks: { color: '#ccc' },
-        grid: { color: '#2a2d3a' }
+    {
+      label: "Actual",
+      data: [],
+      borderColor: "orange",
+      backgroundColor: "rgba(255,165,0,0.2)",
+      fill: true,
+      tension: 0.3
+    }
+  ]
+};
+
+let renoChart = new Chart(renoCtx, {
+  type: "line",
+  data: renoData,
+  options: {
+    responsive: true,
+    plugins: {
+      tooltip: {
+        callbacks: {
+          label: (context) => `${currencySymbol}${context.formattedValue}`
+        }
       }
     }
   }
 });
 
-// ----------------- Form Handling -----------------
-document.getElementById('entry-form').addEventListener('submit', (e) => {
+document.getElementById("renoForm").addEventListener("submit", (e) => {
   e.preventDefault();
+  const category = document.getElementById("renoCategory").value;
+  const budget = parseFloat(document.getElementById("renoBudget").value) || 0;
+  const actual = parseFloat(document.getElementById("renoActual").value) || 0;
 
-  const type = document.getElementById('type').value;
-  const description = document.getElementById('description').value.trim();
-  const amount = parseFloat(document.getElementById('amount').value);
-  const date = document.getElementById('date').value;
+  renoData.labels.push(category + " " + (renoData.labels.length + 1));
+  renoData.datasets[0].data.push(budget);
+  renoData.datasets[1].data.push(actual);
 
-  if (!type || !description || isNaN(amount) || !date) {
-    alert("Please fill in all fields.");
-    return;
-  }
-
-  // Store the entry
-  entries.push({ type, description, amount, date });
-
-  // Recalculate totals per date
-  let totalsByDate = {};
-  entries.forEach(entry => {
-    if (!totalsByDate[entry.date]) {
-      totalsByDate[entry.date] = 0;
-    }
-    if (entry.type === "income") {
-      totalsByDate[entry.date] += entry.amount;
-    } else {
-      totalsByDate[entry.date] -= entry.amount;
-    }
-  });
-
-  // Sort by date
-  const sortedDates = Object.keys(totalsByDate).sort();
-
-  // Calculate cumulative net flow
-  let cumulative = 0;
-  const netFlow = sortedDates.map(d => {
-    cumulative += totalsByDate[d];
-    return cumulative;
-  });
-
-  // Update chart
-  cashflowChart.data.labels = sortedDates;
-  cashflowChart.data.datasets[0].data = netFlow;
-  cashflowChart.update();
-
-  // Reset form
+  renoChart.update();
   e.target.reset();
 });
+
+// ==========================
+// Utility: Update charts when currency changes
+// ==========================
+function updateCharts() {
+  cashFlowChart.options.plugins.tooltip.callbacks.label = (context) => `${currencySymbol}${context.formattedValue}`;
+  renoChart.options.plugins.tooltip.callbacks.label = (context) => `${currencySymbol}${context.formattedValue}`;
+  cashFlowChart.update();
+  renoChart.update();
+}
