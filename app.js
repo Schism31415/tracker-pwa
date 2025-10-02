@@ -1,264 +1,218 @@
-// ===== GLOBAL STATE =====
-let incomes = [];
-let expenses = [];
-let tenants = [];
-let selectedCurrency = "$";
+// ====== GLOBAL STATE ======
+let tenants = JSON.parse(localStorage.getItem("tenants")) || [];
+let entries = JSON.parse(localStorage.getItem("entries")) || [];
+let currentCurrency = "£";
 
-// ===== TENANT MANAGEMENT =====
+// ====== ELEMENTS ======
+const tenantForm = document.getElementById("tenant-form");
+const tenantNameInput = document.getElementById("tenant-name");
 const tenantList = document.getElementById("tenant-list");
-const tenantInputs = document.querySelectorAll(".tenant-select");
+const tenantSelect = document.getElementById("tenant-select");
 
-document.getElementById("add-tenant").addEventListener("click", () => {
-  const newTenant = document.getElementById("new-tenant").value.trim();
-  if (newTenant && !tenants.includes(newTenant)) {
-    tenants.push(newTenant);
-    document.getElementById("new-tenant").value = "";
-    updateTenantDropdowns();
-    renderTenantList();
+const entryForm = document.getElementById("entry-form");
+const amountInput = document.getElementById("amount");
+const typeSelect = document.getElementById("type");
+const currencySelect = document.getElementById("currency-select");
+const entriesTableBody = document.querySelector("#entries-table tbody");
+
+const saveSessionBtn = document.getElementById("save-session");
+const loadSessionBtn = document.getElementById("load-session");
+const deleteSessionBtn = document.getElementById("delete-session");
+const exportCsvBtn = document.getElementById("export-csv");
+
+let financeChart;
+
+// ====== INIT ======
+document.addEventListener("DOMContentLoaded", () => {
+  renderTenants();
+  renderEntries();
+  updateChart();
+});
+
+// ====== TENANTS ======
+tenantForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const tenantName = tenantNameInput.value.trim();
+  if (tenantName && !tenants.includes(tenantName)) {
+    tenants.push(tenantName);
+    localStorage.setItem("tenants", JSON.stringify(tenants));
+    tenantNameInput.value = "";
+    renderTenants();
   }
 });
 
-function updateTenantDropdowns() {
-  tenantInputs.forEach(select => {
-    select.innerHTML = "";
-    tenants.forEach(t => {
-      const option = document.createElement("option");
-      option.value = t;
-      option.textContent = t;
-      select.appendChild(option);
-    });
-  });
-}
-
-function renderTenantList() {
+function renderTenants() {
+  // Update tenant list
   tenantList.innerHTML = "";
-  tenants.forEach(t => {
+  tenants.forEach((tenant) => {
     const li = document.createElement("li");
-    li.textContent = t;
+    li.textContent = tenant;
+
     const removeBtn = document.createElement("button");
     removeBtn.textContent = "Remove";
     removeBtn.onclick = () => {
-      tenants = tenants.filter(x => x !== t);
-      updateTenantDropdowns();
-      renderTenantList();
+      tenants = tenants.filter((t) => t !== tenant);
+      localStorage.setItem("tenants", JSON.stringify(tenants));
+      renderTenants();
+      renderEntries();
     };
+
     li.appendChild(removeBtn);
     tenantList.appendChild(li);
   });
-}
 
-// ===== INCOME FORM =====
-document.getElementById("income-form").addEventListener("submit", e => {
-  e.preventDefault();
-  const amount = parseFloat(document.getElementById("income-amount").value);
-  const source = document.getElementById("income-source").value.trim();
-  const tenant = document.getElementById("income-tenant").value || "N/A";
-
-  if (!isNaN(amount) && source) {
-    incomes.push({ date: new Date().toLocaleDateString(), source, tenant, amount });
-    renderIncomeTable();
-    updateChart();
-    e.target.reset();
-  }
-});
-
-function renderIncomeTable() {
-  const body = document.getElementById("income-table-body");
-  body.innerHTML = "";
-  incomes.forEach(inc => {
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td>${inc.date}</td>
-      <td>${inc.source}</td>
-      <td>${inc.tenant}</td>
-      <td>${selectedCurrency} ${inc.amount.toFixed(2)}</td>
-    `;
-    body.appendChild(row);
+  // Update tenant dropdown
+  tenantSelect.innerHTML = `<option value="">Select tenant</option>`;
+  tenants.forEach((tenant) => {
+    const option = document.createElement("option");
+    option.value = tenant;
+    option.textContent = tenant;
+    tenantSelect.appendChild(option);
   });
 }
 
-// ===== EXPENSE FORM =====
-document.getElementById("expense-form").addEventListener("submit", e => {
+// ====== ENTRIES ======
+entryForm.addEventListener("submit", (e) => {
   e.preventDefault();
-  const amount = parseFloat(document.getElementById("expense-amount").value);
-  const category = document.getElementById("expense-category").value.trim();
-  const tenant = document.getElementById("expense-tenant").value || "N/A";
+  const tenant = tenantSelect.value;
+  const amount = parseFloat(amountInput.value);
+  const type = typeSelect.value;
+  const currency = currencySelect.value;
 
-  if (!isNaN(amount) && category) {
-    expenses.push({ date: new Date().toLocaleDateString(), category, tenant, amount });
-    renderExpenseTable();
-    updateChart();
-    e.target.reset();
-  }
+  if (!tenant || isNaN(amount)) return;
+
+  const entry = {
+    tenant,
+    amount,
+    type,
+    currency,
+    date: new Date().toLocaleDateString(),
+  };
+
+  entries.push(entry);
+  localStorage.setItem("entries", JSON.stringify(entries));
+  renderEntries();
+  updateChart();
+
+  entryForm.reset();
 });
 
-function renderExpenseTable() {
-  const body = document.getElementById("expense-table-body");
-  body.innerHTML = "";
-  expenses.forEach(exp => {
+function renderEntries() {
+  entriesTableBody.innerHTML = "";
+  entries.forEach((entry, index) => {
     const row = document.createElement("tr");
     row.innerHTML = `
-      <td>${exp.date}</td>
-      <td>${exp.category}</td>
-      <td>${exp.tenant}</td>
-      <td>${selectedCurrency} ${exp.amount.toFixed(2)}</td>
+      <td>${entry.tenant}</td>
+      <td>${entry.type}</td>
+      <td>${entry.amount.toFixed(2)}</td>
+      <td>${entry.currency}</td>
+      <td>${entry.date}</td>
+      <td><button onclick="deleteEntry(${index})">Remove</button></td>
     `;
-    body.appendChild(row);
+    entriesTableBody.appendChild(row);
   });
 }
 
-// ===== CHART =====
-const ctx = document.getElementById("cashflow-chart").getContext("2d");
-let cashflowChart = new Chart(ctx, {
-  type: "line",
-  data: {
-    labels: [],
-    datasets: [
-      {
-        label: "Income",
-        borderColor: "green",
-        backgroundColor: "rgba(0,128,0,0.2)",
-        data: [],
-        tension: 0.4
-      },
-      {
-        label: "Expenses",
-        borderColor: "red",
-        backgroundColor: "rgba(255,0,0,0.2)",
-        data: [],
-        tension: 0.4
-      }
-    ]
-  },
-  options: {
-    responsive: true,
-    plugins: { legend: { position: "top" } },
-    scales: {
-      y: { beginAtZero: true, title: { display: true, text: "Amount" } },
-      x: { title: { display: true, text: "Entries" } }
-    }
-  }
-});
-
-function updateChart() {
-  const labels = incomes.map((_, i) => `Entry ${i + 1}`);
-  cashflowChart.data.labels = labels;
-  cashflowChart.data.datasets[0].data = incomes.map(i => i.amount);
-  cashflowChart.data.datasets[1].data = expenses.map(e => e.amount);
-  cashflowChart.update();
+function deleteEntry(index) {
+  entries.splice(index, 1);
+  localStorage.setItem("entries", JSON.stringify(entries));
+  renderEntries();
+  updateChart();
 }
 
-// ===== SESSION MANAGEMENT =====
-document.getElementById("save-session").addEventListener("click", () => {
-  const name = document.getElementById("session-name").value.trim();
-  if (name) {
-    const sessionData = { incomes, expenses, tenants, currency: selectedCurrency };
-    localStorage.setItem(`session_${name}`, JSON.stringify(sessionData));
-    alert("Session saved!");
-  }
+// ====== SESSIONS ======
+saveSessionBtn.addEventListener("click", () => {
+  localStorage.setItem("savedSession", JSON.stringify(entries));
+  alert("Session saved!");
 });
 
-document.getElementById("load-session").addEventListener("click", () => {
-  const name = document.getElementById("session-name").value.trim();
-  const data = JSON.parse(localStorage.getItem(`session_${name}`));
-  if (data) {
-    incomes = data.incomes || [];
-    expenses = data.expenses || [];
-    tenants = data.tenants || [];
-    selectedCurrency = data.currency || "$";
-    renderIncomeTable();
-    renderExpenseTable();
-    updateTenantDropdowns();
-    renderTenantList();
+loadSessionBtn.addEventListener("click", () => {
+  const saved = JSON.parse(localStorage.getItem("savedSession"));
+  if (saved) {
+    entries = saved;
+    localStorage.setItem("entries", JSON.stringify(entries));
+    renderEntries();
     updateChart();
     alert("Session loaded!");
   } else {
-    alert("No session found!");
+    alert("No saved session found.");
   }
 });
 
-document.getElementById("delete-session").addEventListener("click", () => {
-  const name = document.getElementById("session-name").value.trim();
-  localStorage.removeItem(`session_${name}`);
-  alert("Session deleted!");
+deleteSessionBtn.addEventListener("click", () => {
+  localStorage.removeItem("savedSession");
+  alert("Saved session deleted.");
 });
 
-// ===== EXPORT CSV =====
-document.getElementById("export-csv").addEventListener("click", () => {
-  let csvContent = "data:text/csv;charset=utf-8,";
-  csvContent += "Date,Type,Category/Source,Tenant,Amount\n";
+// ====== EXPORT CSV ======
+exportCsvBtn.addEventListener("click", () => {
+  if (!entries.length) {
+    alert("No data to export.");
+    return;
+  }
 
-  incomes.forEach(inc => {
-    csvContent += `${inc.date},Income,${inc.source},${inc.tenant},${selectedCurrency} ${inc.amount}\n`;
-  });
-  expenses.forEach(exp => {
-    csvContent += `${exp.date},Expense,${exp.category},${exp.tenant},${selectedCurrency} ${exp.amount}\n`;
+  let csvContent = "data:text/csv;charset=utf-8,";
+  csvContent += "Tenant,Type,Amount,Currency,Date\n";
+  entries.forEach((e) => {
+    csvContent += `${e.tenant},${e.type},${e.amount},${e.currency},${e.date}\n`;
   });
 
   const encodedUri = encodeURI(csvContent);
   const link = document.createElement("a");
   link.setAttribute("href", encodedUri);
-  link.setAttribute("download", "investor_dashboard_data.csv");
+  link.setAttribute("download", "finance_report.csv");
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
 });
 
-// ===== EXPORT GRAPH (PNG) =====
-document.getElementById("export-graph").addEventListener("click", () => {
-  const link = document.createElement("a");
-  link.href = cashflowChart.toBase64Image();
-  link.download = "cashflow_chart.png";
-  link.click();
-});
+// ====== CHART ======
+function updateChart() {
+  const labels = entries.map((e) => e.date);
+  const incomeData = entries.map((e) => (e.type === "income" ? e.amount : 0));
+  const expenseData = entries.map((e) => (e.type === "expense" ? e.amount : 0));
 
-// ===== EXPORT PDF =====
-document.getElementById("export-pdf").addEventListener("click", () => {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
+  const ctx = document.getElementById("financeChart").getContext("2d");
+  if (financeChart) financeChart.destroy();
 
-  doc.setFontSize(16);
-  doc.text("Investor Dashboard Report", 20, 20);
-
-  doc.setFontSize(12);
-  doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, 30);
-  doc.text(`Currency: ${selectedCurrency}`, 20, 37);
-
-  // Income summary
-  let y = 50;
-  doc.text("Income:", 20, y);
-  incomes.forEach(inc => {
-    y += 7;
-    doc.text(`${inc.date} | ${inc.source} | ${inc.tenant} | ${selectedCurrency} ${inc.amount.toFixed(2)}`, 25, y);
+  financeChart = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels,
+      datasets: [
+        {
+          label: "Income",
+          data: incomeData,
+          borderColor: "#28a745",
+          backgroundColor: "rgba(40,167,69,0.2)",
+          fill: true,
+          tension: 0.4, // curve
+        },
+        {
+          label: "Expenses",
+          data: expenseData,
+          borderColor: "#dc3545",
+          backgroundColor: "rgba(220,53,69,0.2)",
+          fill: true,
+          tension: 0.4, // curve
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: "bottom" },
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            callback: function (value) {
+              return currentCurrency + value;
+            },
+          },
+        },
+      },
+    },
   });
-
-  // Expense summary
-  y += 15;
-  doc.text("Expenses:", 20, y);
-  expenses.forEach(exp => {
-    y += 7;
-    doc.text(`${exp.date} | ${exp.category} | ${exp.tenant} | ${selectedCurrency} ${exp.amount.toFixed(2)}`, 25, y);
-  });
-
-  // Chart image
-  const chartImg = cashflowChart.toBase64Image();
-  doc.addPage();
-  doc.text("Cashflow Chart", 20, 20);
-  doc.addImage(chartImg, "PNG", 15, 30, 180, 100);
-
-  doc.save("investor_dashboard_report.pdf");
-});
-
-// ===== CURRENCY SELECTION =====
-const currencySelect = document.getElementById("currency-select");
-["$", "£", "€"].forEach(curr => {
-  const opt = document.createElement("option");
-  opt.value = curr;
-  opt.textContent = curr;
-  currencySelect.appendChild(opt);
-});
-currencySelect.addEventListener("change", e => {
-  selectedCurrency = e.target.value;
-  renderIncomeTable();
-  renderExpenseTable();
-});
+}
