@@ -1,195 +1,82 @@
-// =============================
-// Premium Investor App (v4)
-// =============================
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Premium Investor App</title>
+  <link rel="stylesheet" href="styles2.css" />
+  <link rel="manifest" href="manifest.json" />
+</head>
+<body>
+  <!-- Header -->
+  <header class="app-header">
+    <img src="icons/icon-192.png" alt="App Logo" class="app-logo" />
+    <h1>Investor Dashboard</h1>
+    <p class="tagline">Track. Manage. Grow.</p>
+  </header>
 
-// Data store
-let tenants = [];
-let currentTenant = null;
-let entries = [];
-let sessions = {};
+  <!-- Description -->
+  <section class="description">
+    <p>Manage tenants, track income and expenses, and view your portfolio performance in real time.</p>
+  </section>
 
-// Chart references
-let incomeExpenseChart;
-let cashFlowChart;
+  <!-- Tenant Management -->
+  <section>
+    <h2>Tenants</h2>
+    <div class="tenant-actions">
+      <input type="text" id="tenantName" placeholder="Enter tenant name" />
+      <button id="addTenantBtn">Add Tenant</button>
+      <button id="removeTenantBtn">Remove Tenant</button>
+    </div>
+    <label for="tenantSelect">Select Tenant:</label>
+    <select id="tenantSelect"></select>
+  </section>
 
-// =============================
-// Tenant Management
-// =============================
-const tenantSelect = document.getElementById("tenantSelect");
-const addTenantBtn = document.getElementById("addTenantBtn");
-const removeTenantBtn = document.getElementById("removeTenantBtn");
-const tenantNameInput = document.getElementById("tenantName");
+  <!-- Entries -->
+  <section>
+    <h2>Entries</h2>
+    <form id="entryForm">
+      <label for="type">Type</label>
+      <select id="type">
+        <option value="income">Income</option>
+        <option value="expense">Expense</option>
+      </select>
 
-addTenantBtn.addEventListener("click", () => {
-  const name = tenantNameInput.value.trim();
-  if (name && !tenants.includes(name)) {
-    tenants.push(name);
-    const option = document.createElement("option");
-    option.value = name;
-    option.textContent = name;
-    tenantSelect.appendChild(option);
-    tenantSelect.value = name;
-    currentTenant = name;
-    entries = [];
-    updateCharts();
-  }
-  tenantNameInput.value = "";
-});
+      <label for="amount">Amount</label>
+      <input type="number" id="amount" placeholder="Enter amount" required />
 
-removeTenantBtn.addEventListener("click", () => {
-  const selected = tenantSelect.value;
-  if (!selected) return;
-  tenants = tenants.filter(t => t !== selected);
-  [...tenantSelect.options].forEach(opt => {
-    if (opt.value === selected) opt.remove();
-  });
-  if (tenants.length > 0) {
-    currentTenant = tenants[0];
-    tenantSelect.value = currentTenant;
-  } else {
-    currentTenant = null;
-    entries = [];
-  }
-  updateCharts();
-});
+      <label for="source">Source / Category</label>
+      <input type="text" id="source" placeholder="E.g. Rent, Repairs" />
 
-tenantSelect.addEventListener("change", () => {
-  currentTenant = tenantSelect.value;
-  entries = [];
-  updateCharts();
-});
+      <button type="submit">Add Entry</button>
+    </form>
+  </section>
 
-// =============================
-// Entries
-// =============================
-const entryForm = document.getElementById("entryForm");
-entryForm.addEventListener("submit", (e) => {
-  e.preventDefault();
-  if (!currentTenant) {
-    alert("Please add and select a tenant first.");
-    return;
-  }
+  <!-- Charts -->
+  <section>
+    <h2>Income vs Expenses</h2>
+    <canvas id="incomeExpenseChart" height="200"></canvas>
+  </section>
 
-  const type = document.getElementById("type").value;
-  const amount = parseFloat(document.getElementById("amount").value);
-  const source = document.getElementById("source").value.trim();
+  <section>
+    <h2>Cash Flow</h2>
+    <canvas id="cashFlowChart" height="200"></canvas>
+  </section>
 
-  if (!isNaN(amount) && amount > 0) {
-    entries.push({ type, amount, source, tenant: currentTenant, date: new Date() });
-    updateCharts();
-    entryForm.reset();
-  }
-});
+  <!-- Sessions -->
+  <section>
+    <h2>Sessions</h2>
+    <div class="session-actions">
+      <input type="text" id="sessionName" placeholder="Session name" />
+      <button id="saveSessionBtn">Save Session</button>
+      <button id="loadSessionBtn">Load Session</button>
+      <button id="deleteSessionBtn">Delete Session</button>
+      <select id="sessionSelect"></select>
+    </div>
+  </section>
 
-// =============================
-// Chart Updates
-// =============================
-function updateCharts() {
-  const ctx1 = document.getElementById("incomeExpenseChart").getContext("2d");
-  const ctx2 = document.getElementById("cashFlowChart").getContext("2d");
-
-  if (incomeExpenseChart) incomeExpenseChart.destroy();
-  if (cashFlowChart) cashFlowChart.destroy();
-
-  let income = 0, expenses = 0;
-  entries.forEach(e => {
-    if (e.type === "income") income += e.amount;
-    if (e.type === "expense") expenses += e.amount;
-  });
-
-  // Income vs Expenses
-  incomeExpenseChart = new Chart(ctx1, {
-    type: "bar",
-    data: {
-      labels: ["Income", "Expenses"],
-      datasets: [{
-        label: "Amount",
-        data: [income, expenses],
-        backgroundColor: ["#4caf50", "#f44336"]
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: { legend: { display: false } }
-    }
-  });
-
-  // Cash Flow chart
-  let balance = 0;
-  const balances = entries.map(e => {
-    balance += (e.type === "income" ? e.amount : -e.amount);
-    return balance;
-  });
-
-  cashFlowChart = new Chart(ctx2, {
-    type: "line",
-    data: {
-      labels: entries.map((e, i) => `#${i + 1}`),
-      datasets: [{
-        label: "Cash Flow",
-        data: balances,
-        borderColor: "#ffd700",
-        backgroundColor: "rgba(255,215,0,0.2)",
-        fill: true,
-        tension: 0.2
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: { legend: { display: false } }
-    }
-  });
-}
-
-// =============================
-// Sessions
-// =============================
-const saveSessionBtn = document.getElementById("saveSessionBtn");
-const loadSessionBtn = document.getElementById("loadSessionBtn");
-const deleteSessionBtn = document.getElementById("deleteSessionBtn");
-const sessionSelect = document.getElementById("sessionSelect");
-const sessionNameInput = document.getElementById("sessionName");
-
-saveSessionBtn.addEventListener("click", () => {
-  const name = sessionNameInput.value.trim();
-  if (!name) return;
-  sessions[name] = { tenants, currentTenant, entries };
-  if (![...sessionSelect.options].some(opt => opt.value === name)) {
-    const option = document.createElement("option");
-    option.value = name;
-    option.textContent = name;
-    sessionSelect.appendChild(option);
-  }
-  sessionSelect.value = name;
-  sessionNameInput.value = "";
-});
-
-loadSessionBtn.addEventListener("click", () => {
-  const selected = sessionSelect.value;
-  if (!selected || !sessions[selected]) return;
-  ({ tenants, currentTenant, entries } = JSON.parse(JSON.stringify(sessions[selected])));
-
-  tenantSelect.innerHTML = "";
-  tenants.forEach(t => {
-    const option = document.createElement("option");
-    option.value = t;
-    option.textContent = t;
-    tenantSelect.appendChild(option);
-  });
-  tenantSelect.value = currentTenant;
-  updateCharts();
-});
-
-deleteSessionBtn.addEventListener("click", () => {
-  const selected = sessionSelect.value;
-  if (!selected) return;
-  delete sessions[selected];
-  [...sessionSelect.options].forEach(opt => {
-    if (opt.value === selected) opt.remove();
-  });
-});
-
-// =============================
-// Init
-// =============================
-updateCharts();
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="app-v4.js"></script>
+</body>
+</html>
