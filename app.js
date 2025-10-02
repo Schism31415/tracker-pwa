@@ -1,141 +1,161 @@
-// ==========================
-// Global Currency Handling
-// ==========================
-let currencySymbol = localStorage.getItem("currencySymbol") || "$";
-document.getElementById("currencySelector").value = currencySymbol;
+// Store data in memory
+let incomes = [];
+let expenses = [];
+let sessions = {};
 
-function updateCurrencyLabels() {
-  document.querySelectorAll(".currency-output").forEach(el => {
-    el.textContent = currencySymbol;
-  });
-}
+// Chart instances
+let cashflowChart, renovationChart;
 
-document.getElementById("currencySelector").addEventListener("change", (e) => {
-  currencySymbol = e.target.value;
-  localStorage.setItem("currencySymbol", currencySymbol);
-  updateCurrencyLabels();
+// Add Income
+document.getElementById("add-income").addEventListener("click", () => {
+  const source = document.getElementById("income-source").value;
+  const amount = parseFloat(document.getElementById("income-amount").value);
+  const date = document.getElementById("income-date").value;
+  if (!amount || !date) return;
+
+  incomes.push({ source, amount, date });
   updateCharts();
 });
 
-updateCurrencyLabels();
+// Add Expense
+document.getElementById("add-expense").addEventListener("click", () => {
+  const category = document.getElementById("expense-category").value;
+  const amount = parseFloat(document.getElementById("expense-amount").value);
+  const date = document.getElementById("expense-date").value;
+  if (!amount || !date) return;
 
-// ==========================
-// Cash Flow Tracker
-// ==========================
-const cashFlowCtx = document.getElementById("cashFlowChart").getContext("2d");
-let cashFlowData = {
-  labels: [],
-  datasets: [
-    {
-      label: "Income",
-      data: [],
-      borderColor: "green",
-      backgroundColor: "rgba(0,255,0,0.2)",
-      fill: true,
-      tension: 0.3
-    },
-    {
-      label: "Expenses",
-      data: [],
-      borderColor: "red",
-      backgroundColor: "rgba(255,0,0,0.2)",
-      fill: true,
-      tension: 0.3
-    }
-  ]
-};
-
-let cashFlowChart = new Chart(cashFlowCtx, {
-  type: "line",
-  data: cashFlowData,
-  options: {
-    responsive: true,
-    plugins: {
-      tooltip: {
-        callbacks: {
-          label: (context) => `${currencySymbol}${context.formattedValue}`
-        }
-      }
-    }
-  }
+  expenses.push({ category, amount, date });
+  updateCharts();
 });
 
-document.getElementById("cashFlowForm").addEventListener("submit", (e) => {
-  e.preventDefault();
-  const income = parseFloat(document.getElementById("income").value) || 0;
-  const expense = parseFloat(document.getElementById("expense").value) || 0;
-  const category = document.getElementById("expenseCategory").value;
-
-  let month = `Month ${cashFlowData.labels.length + 1}`;
-  cashFlowData.labels.push(month);
-  cashFlowData.datasets[0].data.push(income);
-  cashFlowData.datasets[1].data.push(expense);
-
-  cashFlowChart.update();
-  e.target.reset();
-});
-
-// ==========================
-// Renovation Tracker
-// ==========================
-const renoCtx = document.getElementById("renoChart").getContext("2d");
-let renoData = {
-  labels: [],
-  datasets: [
-    {
-      label: "Budget",
-      data: [],
-      borderColor: "blue",
-      backgroundColor: "rgba(0,0,255,0.2)",
-      fill: true,
-      tension: 0.3
-    },
-    {
-      label: "Actual",
-      data: [],
-      borderColor: "orange",
-      backgroundColor: "rgba(255,165,0,0.2)",
-      fill: true,
-      tension: 0.3
-    }
-  ]
-};
-
-let renoChart = new Chart(renoCtx, {
-  type: "line",
-  data: renoData,
-  options: {
-    responsive: true,
-    plugins: {
-      tooltip: {
-        callbacks: {
-          label: (context) => `${currencySymbol}${context.formattedValue}`
-        }
-      }
-    }
-  }
-});
-
-document.getElementById("renoForm").addEventListener("submit", (e) => {
-  e.preventDefault();
-  const category = document.getElementById("renoCategory").value;
-  const budget = parseFloat(document.getElementById("renoBudget").value) || 0;
-  const actual = parseFloat(document.getElementById("renoActual").value) || 0;
-
-  renoData.labels.push(category + " " + (renoData.labels.length + 1));
-  renoData.datasets[0].data.push(budget);
-  renoData.datasets[1].data.push(actual);
-
-  renoChart.update();
-  e.target.reset();
-});
-
-// ==========================
-// Utility: Update charts when currency changes
-// ==========================
+// Update Charts
 function updateCharts() {
-  cashFlowChart.options.plugins.tooltip.callbacks.label = (context) => `${currencySymbol}${context.formattedValue}`;
-  renoChart.options.plugins.tooltip.callbacks.label = (context) => `${currencySymbol}${context.formattedValue}`;
-  cashFlowChart.update();
-  renoChart.update();
+  // Cashflow by month
+  const months = {};
+  incomes.forEach(i => {
+    const m = i.date.slice(0,7);
+    months[m] = (months[m] || 0) + i.amount;
+  });
+  expenses.forEach(e => {
+    const m = e.date.slice(0,7);
+    months[m] = (months[m] || 0) - e.amount;
+  });
+
+  const labels = Object.keys(months).sort();
+  const data = labels.map(l => months[l]);
+
+  if (cashflowChart) cashflowChart.destroy();
+  cashflowChart = new Chart(document.getElementById("cashflow-chart"), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: "Net Cash Flow",
+        data,
+        borderColor: "#ffd700",
+        backgroundColor: "rgba(255,215,0,0.2)",
+        fill: true
+      }]
+    },
+    options: {
+      plugins: {
+        legend: { labels: { color: "#fff" } },
+        tooltip: { callbacks: { label: ctx => `$${ctx.raw}` } },
+      },
+      scales: {
+        x: { ticks: { color: "#fff" } },
+        y: { ticks: { color: "#fff" } }
+      }
+    }
+  });
+
+  // Renovation chart
+  if (renovationChart) renovationChart.destroy();
+  renovationChart = new Chart(document.getElementById("renovation-chart"), {
+    type: 'bar',
+    data: {
+      labels: expenses.map(e => e.category),
+      datasets: [{
+        label: "Expenses",
+        data: expenses.map(e => e.amount),
+        backgroundColor: "#ffd700"
+      }]
+    },
+    options: {
+      plugins: {
+        legend: { labels: { color: "#fff" } },
+        tooltip: { callbacks: { label: ctx => `$${ctx.raw}` } },
+      },
+      scales: {
+        x: { ticks: { color: "#fff" } },
+        y: { ticks: { color: "#fff" } }
+      }
+    }
+  });
 }
+
+// Save session
+document.getElementById("save-session").addEventListener("click", () => {
+  const name = document.getElementById("session-name").value;
+  if (!name) return;
+  sessions[name] = { incomes, expenses };
+  localStorage.setItem("sessions", JSON.stringify(sessions));
+  refreshSessions();
+});
+
+// Load sessions on startup
+window.onload = () => {
+  sessions = JSON.parse(localStorage.getItem("sessions")) || {};
+  refreshSessions();
+};
+
+// Refresh dropdown
+function refreshSessions() {
+  const select = document.getElementById("session-list");
+  select.innerHTML = "";
+  Object.keys(sessions).forEach(s => {
+    const opt = document.createElement("option");
+    opt.value = s;
+    opt.textContent = s;
+    select.appendChild(opt);
+  });
+}
+
+// Load session
+document.getElementById("load-session").addEventListener("click", () => {
+  const name = document.getElementById("session-list").value;
+  if (!name) return;
+  ({ incomes, expenses } = sessions[name]);
+  updateCharts();
+});
+
+// Delete session
+document.getElementById("delete-session").addEventListener("click", () => {
+  const name = document.getElementById("session-list").value;
+  if (!name) return;
+  delete sessions[name];
+  localStorage.setItem("sessions", JSON.stringify(sessions));
+  refreshSessions();
+});
+
+// Export CSV
+document.getElementById("export-csv").addEventListener("click", () => {
+  let csv = "Type,Category/Source,Amount,Date\n";
+  incomes.forEach(i => csv += `Income,${i.source},${i.amount},${i.date}\n`);
+  expenses.forEach(e => csv += `Expense,${e.category},${e.amount},${e.date}\n`);
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "session.csv";
+  a.click();
+});
+
+// Export chart
+document.getElementById("export-chart").addEventListener("click", () => {
+  const url = document.getElementById("cashflow-chart").toDataURL("image/png");
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "cashflow.png";
+  a.click();
+});
