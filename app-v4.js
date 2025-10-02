@@ -194,3 +194,4 @@ exportPDFBtn.addEventListener("click", () => {
 // ==== Init ====
 populateTenants();
 renderCharts();
+
