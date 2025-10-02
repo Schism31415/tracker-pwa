@@ -1,197 +1,162 @@
-// ==== Data Structures ====
+// ================== Global State ==================
 let tenants = JSON.parse(localStorage.getItem("tenants")) || [];
-let transactions = JSON.parse(localStorage.getItem("transactions")) || [];
-let sessions = JSON.parse(localStorage.getItem("sessions")) || {};
+let currentTenant = null;
+let tenantData = JSON.parse(localStorage.getItem("tenantData")) || {};
+let sessions = JSON.parse(localStorage.getItem("sessions")) || [];
 
-const tenantSelect = document.getElementById("tenantSelect");
+// ================== DOM Elements ==================
+const tenantSelect = document.getElementById("tenant");
 const addTenantBtn = document.getElementById("addTenant");
-const tenantNameInput = document.getElementById("tenantName");
+const removeTenantBtn = document.getElementById("removeTenant");
 
-const transactionForm = document.getElementById("transactionForm");
+const sessionNameInput = document.getElementById("sessionName");
 const saveSessionBtn = document.getElementById("saveSession");
 const loadSessionBtn = document.getElementById("loadSession");
 const deleteSessionBtn = document.getElementById("deleteSession");
-const exportCSVBtn = document.getElementById("exportCSV");
-const exportPDFBtn = document.getElementById("exportPDF");
+const sessionSelect = document.getElementById("session");
 
-const sessionNameInput = document.getElementById("sessionName");
+// ================== Chart Setup ==================
+const incomeCtx = document.getElementById("incomeChart").getContext("2d");
+const expenseCtx = document.getElementById("expenseChart").getContext("2d");
 
-// Chart instances
-let incomeChart, expenseChart;
+let incomeChart = new Chart(incomeCtx, {
+  type: "line",
+  data: { labels: [], datasets: [{ label: "Income (£)", borderColor: "#ffd700", data: [] }] },
+  options: { responsive: true, plugins: { legend: { labels: { color: "#ffd700" } } }, scales: { x: { ticks: { color: "#ffd700" } }, y: { ticks: { color: "#ffd700" } } } }
+});
 
-// ==== Utility Functions ====
-function saveToStorage() {
-  localStorage.setItem("tenants", JSON.stringify(tenants));
-  localStorage.setItem("transactions", JSON.stringify(transactions));
-  localStorage.setItem("sessions", JSON.stringify(sessions));
-}
+let expenseChart = new Chart(expenseCtx, {
+  type: "line",
+  data: { labels: [], datasets: [{ label: "Expenses (£)", borderColor: "#ff4d4d", data: [] }] },
+  options: { responsive: true, plugins: { legend: { labels: { color: "#ffd700" } } }, scales: { x: { ticks: { color: "#ffd700" } }, y: { ticks: { color: "#ffd700" } } } }
+});
 
-function populateTenants() {
-  tenantSelect.innerHTML = '<option value="">Select Tenant</option>';
+// ================== Functions ==================
+function updateTenantDropdown() {
+  tenantSelect.innerHTML = "";
   tenants.forEach(t => {
     const opt = document.createElement("option");
     opt.value = t;
     opt.textContent = t;
     tenantSelect.appendChild(opt);
   });
+  if (currentTenant && tenants.includes(currentTenant)) {
+    tenantSelect.value = currentTenant;
+  } else {
+    currentTenant = null;
+  }
 }
 
-function renderCharts() {
-  const incomes = {};
-  const expenses = {};
-
-  transactions.forEach(t => {
-    if (t.type === "income") {
-      incomes[t.tenant] = (incomes[t.tenant] || 0) + t.amount;
-    } else {
-      expenses[t.tenant] = (expenses[t.tenant] || 0) + t.amount;
-    }
-  });
-
-  const tenantLabels = [...new Set([...Object.keys(incomes), ...Object.keys(expenses)])];
-
-  // Destroy old charts if they exist
-  if (incomeChart) incomeChart.destroy();
-  if (expenseChart) expenseChart.destroy();
-
-  // Income chart
-  const incomeCtx = document.getElementById("incomeChart").getContext("2d");
-  incomeChart = new Chart(incomeCtx, {
-    type: "line",
-    data: {
-      labels: tenantLabels,
-      datasets: [{
-        label: "Income",
-        data: tenantLabels.map(t => incomes[t] || 0),
-        borderColor: "#ffd700",
-        backgroundColor: "rgba(255,215,0,0.2)",
-        fill: true,
-        tension: 0.4 // makes the curve smooth
-      }]
-    },
-    options: {
-      plugins: { legend: { labels: { color: "#f1f1f1" } } },
-      scales: {
-        x: { ticks: { color: "#f1f1f1" } },
-        y: { ticks: { color: "#f1f1f1" } }
-      }
-    }
-  });
-
-  // Expense chart
-  const expenseCtx = document.getElementById("expenseChart").getContext("2d");
-  expenseChart = new Chart(expenseCtx, {
-    type: "line",
-    data: {
-      labels: tenantLabels,
-      datasets: [{
-        label: "Expenses",
-        data: tenantLabels.map(t => expenses[t] || 0),
-        borderColor: "#ff4d4d",
-        backgroundColor: "rgba(255,77,77,0.2)",
-        fill: true,
-        tension: 0.4
-      }]
-    },
-    options: {
-      plugins: { legend: { labels: { color: "#f1f1f1" } } },
-      scales: {
-        x: { ticks: { color: "#f1f1f1" } },
-        y: { ticks: { color: "#f1f1f1" } }
-      }
-    }
+function updateSessionDropdown() {
+  sessionSelect.innerHTML = "";
+  sessions.forEach(s => {
+    const opt = document.createElement("option");
+    opt.value = s.name;
+    opt.textContent = s.name;
+    sessionSelect.appendChild(opt);
   });
 }
 
-// ==== Event Listeners ====
-// Add Tenant
+function saveState() {
+  localStorage.setItem("tenants", JSON.stringify(tenants));
+  localStorage.setItem("tenantData", JSON.stringify(tenantData));
+  localStorage.setItem("sessions", JSON.stringify(sessions));
+}
+
+function loadTenantData(name) {
+  if (!tenantData[name]) tenantData[name] = { income: [], expenses: [] };
+  let data = tenantData[name];
+
+  incomeChart.data.labels = data.income.map((_, i) => `Entry ${i + 1}`);
+  incomeChart.data.datasets[0].data = data.income;
+  expenseChart.data.labels = data.expenses.map((_, i) => `Entry ${i + 1}`);
+  expenseChart.data.datasets[0].data = data.expenses;
+
+  incomeChart.update();
+  expenseChart.update();
+}
+
+// ================== Tenant Events ==================
 addTenantBtn.addEventListener("click", () => {
-  const name = tenantNameInput.value.trim();
-  if (name && !tenants.includes(name)) {
-    tenants.push(name);
-    tenantNameInput.value = "";
-    populateTenants();
-    saveToStorage();
-    renderCharts();
+  const newTenant = document.getElementById("tenantInput").value.trim();
+  if (newTenant && !tenants.includes(newTenant)) {
+    tenants.push(newTenant);
+    tenantData[newTenant] = { income: [], expenses: [] };
+    currentTenant = newTenant;
+    saveState();
+    updateTenantDropdown();
+    loadTenantData(currentTenant);
+    document.getElementById("tenantInput").value = "";
   }
 });
 
-// Add Transaction
-transactionForm.addEventListener("submit", e => {
-  e.preventDefault();
-  const type = document.getElementById("type").value;
-  const amount = parseFloat(document.getElementById("amount").value);
-  const currency = document.getElementById("currency").value;
-  const category = document.getElementById("category").value;
-  const tenant = tenantSelect.value;
+removeTenantBtn.addEventListener("click", () => {
+  if (tenantSelect.value) {
+    const toRemove = tenantSelect.value;
+    const confirmed = confirm(`Are you sure you want to remove tenant "${toRemove}" and all their data?`);
+    if (!confirmed) return;
 
-  if (!tenant) {
-    alert("Please select a tenant first!");
-    return;
+    tenants = tenants.filter(t => t !== toRemove);
+    delete tenantData[toRemove];
+    currentTenant = null;
+    saveState();
+    updateTenantDropdown();
+
+    // Reset charts
+    incomeChart.data.labels = [];
+    incomeChart.data.datasets[0].data = [];
+    expenseChart.data.labels = [];
+    expenseChart.data.datasets[0].data = [];
+    incomeChart.update();
+    expenseChart.update();
   }
-
-  transactions.push({ type, amount, currency, category, tenant });
-  transactionForm.reset();
-  saveToStorage();
-  renderCharts();
 });
 
-// Save Session
+// ================== Session Events ==================
 saveSessionBtn.addEventListener("click", () => {
-  const name = sessionNameInput.value.trim();
-  if (!name) return alert("Enter session name");
-  sessions[name] = { tenants: [...tenants], transactions: [...transactions] };
-  saveToStorage();
-  alert("Session saved!");
+  const sessionName = sessionNameInput.value.trim();
+  if (!sessionName) return alert("Enter a session name");
+
+  const newSession = { name: sessionName, tenants: [...tenants], tenantData: { ...tenantData } };
+  sessions = sessions.filter(s => s.name !== sessionName); // overwrite if exists
+  sessions.push(newSession);
+
+  saveState();
+  updateSessionDropdown();
+  sessionNameInput.value = "";
 });
 
-// Load Session
 loadSessionBtn.addEventListener("click", () => {
-  const name = sessionNameInput.value.trim();
-  if (!name || !sessions[name]) return alert("Session not found!");
-  tenants = [...sessions[name].tenants];
-  transactions = [...sessions[name].transactions];
-  populateTenants();
-  saveToStorage();
-  renderCharts();
-  alert("Session loaded!");
+  if (!sessionSelect.value) return alert("Select a session first");
+
+  const session = sessions.find(s => s.name === sessionSelect.value);
+  if (!session) return;
+
+  tenants = [...session.tenants];
+  tenantData = { ...session.tenantData };
+  currentTenant = tenants.length ? tenants[0] : null;
+
+  saveState();
+  updateTenantDropdown();
+  if (currentTenant) loadTenantData(currentTenant);
 });
 
-// Delete Session
 deleteSessionBtn.addEventListener("click", () => {
-  const name = sessionNameInput.value.trim();
-  if (!name || !sessions[name]) return alert("Session not found!");
-  delete sessions[name];
-  saveToStorage();
-  alert("Session deleted!");
+  if (!sessionSelect.value) return alert("Select a session to delete");
+
+  const toRemove = sessionSelect.value;
+  const confirmed = confirm(`Are you sure you want to delete session "${toRemove}"?`);
+  if (!confirmed) return;
+
+  sessions = sessions.filter(s => s.name !== toRemove);
+  saveState();
+  updateSessionDropdown();
 });
 
-// Export CSV
-exportCSVBtn.addEventListener("click", () => {
-  let csv = "Type,Amount,Currency,Category,Tenant\n";
-  transactions.forEach(t => {
-    csv += `${t.type},${t.amount},${t.currency},${t.category},${t.tenant}\n`;
-  });
-  const blob = new Blob([csv], { type: "text/csv" });
-  const link = document.createElement("a");
-  link.href = URL.createObjectURL(blob);
-  link.download = "transactions.csv";
-  link.click();
-});
-
-// Export PDF
-exportPDFBtn.addEventListener("click", () => {
-  const doc = new jsPDF();
-  doc.text("Transactions Report", 10, 10);
-  let y = 20;
-  transactions.forEach(t => {
-    doc.text(`${t.type} - ${t.amount}${t.currency} (${t.category}) [${t.tenant}]`, 10, y);
-    y += 10;
-  });
-  doc.save("transactions.pdf");
-});
-
-// ==== Init ====
-populateTenants();
-renderCharts();
-
+// ================== Init ==================
+updateTenantDropdown();
+updateSessionDropdown();
+if (tenants.length > 0) {
+  currentTenant = tenants[0];
+  loadTenantData(currentTenant);
+}
