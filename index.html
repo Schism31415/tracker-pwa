@@ -1,57 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Investor Premium App</title>
-
-  <!-- Manifest for PWA -->
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#003366">
-
-  <!-- Styles -->
-  <link rel="stylesheet" href="styles.css">
-
-  <!-- Chart.js -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Investor’s 2-in-1 Dashboard</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="styles.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-  <!-- ===== Header ===== -->
   <header>
-    <img src="icons/app-icon.png" alt="App Icon">
-    <h1>Investor Premium</h1>
-    <p>Track income, expenses, and tenants in one place</p>
+    <img src="icons/icon-192.png" alt="App Logo" />
+    <h1>The Investor’s 2-in-1 Dashboard</h1>
+    <p class="subtitle">
+      Track rental cashflow and renovation costs in one premium tool.
+    </p>
   </header>
 
-  <!-- ===== Main Container ===== -->
-  <div class="container">
-
-    <!-- Tenant Management -->
+  <main>
+    <!-- ===== Tenants ===== -->
     <section>
       <h2>Manage Tenants</h2>
       <form id="tenant-form">
-        <input type="text" id="tenant-name" placeholder="Tenant name" required>
+        <input type="text" id="tenant-name" placeholder="Enter tenant name" required />
         <button type="submit">Add Tenant</button>
       </form>
       <ul id="tenant-list"></ul>
     </section>
 
-    <!-- Add Income/Expense -->
+    <!-- ===== Entries ===== -->
     <section>
-      <h2>Record Income / Expense</h2>
+      <h2>Income & Expenses</h2>
       <form id="entry-form">
         <select id="tenant-select" required>
           <option value="">Select tenant</option>
         </select>
-        <select id="currency-select" required>
-          <option value="£">£ (GBP)</option>
-          <option value="$">$ (USD)</option>
-          <option value="€">€ (EUR)</option>
-        </select>
-        <input type="number" id="amount" placeholder="Amount" required>
-        <select id="type" required>
+        <input type="number" id="amount" placeholder="Amount" step="0.01" required />
+        <select id="type">
           <option value="income">Income</option>
           <option value="expense">Expense</option>
+        </select>
+        <select id="currency-select">
+          <option value="£">£</option>
+          <option value="$">$</option>
+          <option value="€">€</option>
         </select>
         <button type="submit">Add Entry</button>
       </form>
@@ -70,27 +62,32 @@
       </table>
     </section>
 
-    <!-- Session Management -->
+    <!-- ===== Sessions ===== -->
     <section>
       <h2>Sessions</h2>
-      <div class="actions">
-        <button id="save-session">Save Session</button>
-        <button id="load-session">Load Session</button>
-        <button id="delete-session">Delete Session</button>
-        <button id="export-csv">Export CSV</button>
-        <button id="export-pdf">Export PDF</button>
-      </div>
+      <button id="save-session">Save Session</button>
+      <button id="load-session">Load Session</button>
+      <button id="delete-session">Delete Session</button>
     </section>
 
-    <!-- Charts -->
+    <!-- ===== Exports ===== -->
+    <section>
+      <h2>Export Reports</h2>
+      <button id="export-csv">Export CSV</button>
+      <button id="export-chart">Export Chart as PNG</button>
+    </section>
+
+    <!-- ===== Chart ===== -->
     <section>
       <h2>Performance Overview</h2>
       <canvas id="financeChart"></canvas>
     </section>
+  </main>
 
-  </div>
+  <footer>
+    <p>&copy; 2025 The Investor’s 2-in-1 Dashboard</p>
+  </footer>
 
-  <!-- ===== JS ===== -->
   <script src="app.js"></script>
 </body>
 </html>
