@@ -1,12 +1,160 @@
-// Store data in memory
 let incomes = [];
 let expenses = [];
 let sessions = {};
+let currency = "£"; // default
 
 // Chart instances
-let cashflowChart, renovationChart;
+let incomeChart, expenseChart;
 
-// Add Income
+// Update charts
+function updateCharts() {
+  if (!incomeChart) {
+    incomeChart = new Chart(document.getElementById("incomeChart"), {
+      type: "line",
+      data: {
+        labels: [],
+        datasets: [{
+          label: "Income",
+          data: [],
+          borderColor: "#4caf50",
+          backgroundColor: "rgba(76, 175, 80, 0.15)",
+          fill: true,
+          tension: 0.4
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { labels: { color: "#333" } },
+          tooltip: { callbacks: {
+            label: ctx => `${currency}${ctx.formattedValue}`
+          }}
+        },
+        scales: {
+          y: {
+            ticks: { callback: value => currency + value }
+          }
+        }
+      }
+    });
+  }
+
+  if (!expenseChart) {
+    expenseChart = new Chart(document.getElementById("expenseChart"), {
+      type: "line",
+      data: {
+        labels: [],
+        datasets: [{
+          label: "Expenses",
+          data: [],
+          borderColor: "#f44336",
+          backgroundColor: "rgba(244, 67, 54, 0.15)",
+          fill: true,
+          tension: 0.4
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { labels: { color: "#333" } },
+          tooltip: { callbacks: {
+            label: ctx => `${currency}${ctx.formattedValue}`
+          }}
+        },
+        scales: {
+          y: {
+            ticks: { callback: value => currency + value }
+          }
+        }
+      }
+    });
+  }
+
+  incomeChart.data.labels = incomes.map((i) => i.date);
+  incomeChart.data.datasets[0].data = incomes.map((i) => i.amount);
+  incomeChart.update();
+
+  expenseChart.data.labels = expenses.map((e) => e.date);
+  expenseChart.data.datasets[0].data = expenses.map((e) => e.amount);
+  expenseChart.update();
+
+  renderLists();
+}
+
+// Render incomes & expenses with ❌ buttons
+function renderLists() {
+  const incomeList = document.getElementById("income-list");
+  const expenseList = document.getElementById("expense-list");
+  incomeList.innerHTML = "";
+  expenseList.innerHTML = "";
+
+  incomes.forEach((i, index) => {
+    const li = document.createElement("li");
+    li.textContent = `${currency}${i.amount} (${i.source}, ${i.date}) `;
+    const delBtn = document.createElement("button");
+    delBtn.textContent = "❌";
+    delBtn.className = "delete-btn";
+    delBtn.onclick = () => {
+      incomes.splice(index, 1);
+      updateCharts();
+      autoSave();
+    };
+    li.appendChild(delBtn);
+    incomeList.appendChild(li);
+  });
+
+  expenses.forEach((e, index) => {
+    const li = document.createElement("li");
+    li.textContent = `${currency}${e.amount} (${e.category}, ${e.date}) `;
+    const delBtn = document.createElement("button");
+    delBtn.textContent = "❌";
+    delBtn.className = "delete-btn";
+    delBtn.onclick = () => {
+      expenses.splice(index, 1);
+      updateCharts();
+      autoSave();
+    };
+    li.appendChild(delBtn);
+    expenseList.appendChild(li);
+  });
+}
+
+// Auto-save
+function autoSave() {
+  localStorage.setItem("autosave", JSON.stringify({ incomes, expenses, currency }));
+  document.getElementById("save-status").textContent =
+    "Last saved at " + new Date().toLocaleTimeString();
+}
+
+// Save session
+document.getElementById("save-session").addEventListener("click", () => {
+  const sessionName = prompt("Enter session name:");
+  if (sessionName) {
+    sessions[sessionName] = { incomes, expenses, currency };
+    localStorage.setItem("sessions", JSON.stringify(sessions));
+    refreshSessions();
+  }
+});
+
+// Refresh saved sessions
+function refreshSessions() {
+  const sessionList = document.getElementById("session-list");
+  sessionList.innerHTML = "";
+  for (let name in sessions) {
+    const li = document.createElement("li");
+    li.textContent = name;
+    li.onclick = () => {
+      incomes = sessions[name].incomes || [];
+      expenses = sessions[name].expenses || [];
+      currency = sessions[name].currency || "£";
+      document.getElementById("currency").value = currency;
+      updateCharts();
+    };
+    sessionList.appendChild(li);
+  }
+}
+
+// Add income
 document.getElementById("add-income").addEventListener("click", () => {
   const source = document.getElementById("income-source").value;
   const amount = parseFloat(document.getElementById("income-amount").value);
@@ -15,9 +163,10 @@ document.getElementById("add-income").addEventListener("click", () => {
 
   incomes.push({ source, amount, date });
   updateCharts();
+  autoSave();
 });
 
-// Add Expense
+// Add expense
 document.getElementById("add-expense").addEventListener("click", () => {
   const category = document.getElementById("expense-category").value;
   const amount = parseFloat(document.getElementById("expense-amount").value);
@@ -26,136 +175,29 @@ document.getElementById("add-expense").addEventListener("click", () => {
 
   expenses.push({ category, amount, date });
   updateCharts();
+  autoSave();
 });
 
-// Update Charts
-function updateCharts() {
-  // Cashflow by month
-  const months = {};
-  incomes.forEach(i => {
-    const m = i.date.slice(0,7);
-    months[m] = (months[m] || 0) + i.amount;
-  });
-  expenses.forEach(e => {
-    const m = e.date.slice(0,7);
-    months[m] = (months[m] || 0) - e.amount;
-  });
-
-  const labels = Object.keys(months).sort();
-  const data = labels.map(l => months[l]);
-
-  if (cashflowChart) cashflowChart.destroy();
-  cashflowChart = new Chart(document.getElementById("cashflow-chart"), {
-    type: 'line',
-    data: {
-      labels,
-      datasets: [{
-        label: "Net Cash Flow",
-        data,
-        borderColor: "#ffd700",
-        backgroundColor: "rgba(255,215,0,0.2)",
-        fill: true
-      }]
-    },
-    options: {
-      plugins: {
-        legend: { labels: { color: "#fff" } },
-        tooltip: { callbacks: { label: ctx => `$${ctx.raw}` } },
-      },
-      scales: {
-        x: { ticks: { color: "#fff" } },
-        y: { ticks: { color: "#fff" } }
-      }
-    }
-  });
-
-  // Renovation chart
-  if (renovationChart) renovationChart.destroy();
-  renovationChart = new Chart(document.getElementById("renovation-chart"), {
-    type: 'bar',
-    data: {
-      labels: expenses.map(e => e.category),
-      datasets: [{
-        label: "Expenses",
-        data: expenses.map(e => e.amount),
-        backgroundColor: "#ffd700"
-      }]
-    },
-    options: {
-      plugins: {
-        legend: { labels: { color: "#fff" } },
-        tooltip: { callbacks: { label: ctx => `$${ctx.raw}` } },
-      },
-      scales: {
-        x: { ticks: { color: "#fff" } },
-        y: { ticks: { color: "#fff" } }
-      }
-    }
-  });
-}
-
-// Save session
-document.getElementById("save-session").addEventListener("click", () => {
-  const name = document.getElementById("session-name").value;
-  if (!name) return;
-  sessions[name] = { incomes, expenses };
-  localStorage.setItem("sessions", JSON.stringify(sessions));
-  refreshSessions();
+// Currency change
+document.getElementById("currency").addEventListener("change", (e) => {
+  currency = e.target.value;
+  updateCharts();
+  autoSave();
 });
 
-// Load sessions on startup
+// Restore sessions + autosave
 window.onload = () => {
   sessions = JSON.parse(localStorage.getItem("sessions")) || {};
   refreshSessions();
+
+  const autosave = JSON.parse(localStorage.getItem("autosave"));
+  if (autosave) {
+    incomes = autosave.incomes || [];
+    expenses = autosave.expenses || [];
+    currency = autosave.currency || "£";
+    document.getElementById("currency").value = currency;
+    updateCharts();
+  } else {
+    updateCharts();
+  }
 };
-
-// Refresh dropdown
-function refreshSessions() {
-  const select = document.getElementById("session-list");
-  select.innerHTML = "";
-  Object.keys(sessions).forEach(s => {
-    const opt = document.createElement("option");
-    opt.value = s;
-    opt.textContent = s;
-    select.appendChild(opt);
-  });
-}
-
-// Load session
-document.getElementById("load-session").addEventListener("click", () => {
-  const name = document.getElementById("session-list").value;
-  if (!name) return;
-  ({ incomes, expenses } = sessions[name]);
-  updateCharts();
-});
-
-// Delete session
-document.getElementById("delete-session").addEventListener("click", () => {
-  const name = document.getElementById("session-list").value;
-  if (!name) return;
-  delete sessions[name];
-  localStorage.setItem("sessions", JSON.stringify(sessions));
-  refreshSessions();
-});
-
-// Export CSV
-document.getElementById("export-csv").addEventListener("click", () => {
-  let csv = "Type,Category/Source,Amount,Date\n";
-  incomes.forEach(i => csv += `Income,${i.source},${i.amount},${i.date}\n`);
-  expenses.forEach(e => csv += `Expense,${e.category},${e.amount},${e.date}\n`);
-  const blob = new Blob([csv], { type: "text/csv" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "session.csv";
-  a.click();
-});
-
-// Export chart
-document.getElementById("export-chart").addEventListener("click", () => {
-  const url = document.getElementById("cashflow-chart").toDataURL("image/png");
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "cashflow.png";
-  a.click();
-});
