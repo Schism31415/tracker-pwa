@@ -1,12 +1,11 @@
 {
-  "name": "Investor Pro Dashboard",
-  "short_name": "InvestorPro",
-  "description": "Track rental cash flow & renovation budgets with ease.",
+  "name": "Premium Investor App",
+  "short_name": "InvestorApp",
+  "description": "Manage tenants, track income and expenses, and view portfolio performance.",
   "start_url": "index.html",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#1d3557",
-  "orientation": "portrait",
+  "background_color": "#121212",
+  "theme_color": "#121212",
   "icons": [
     {
       "src": "icons/icon-192.png",
