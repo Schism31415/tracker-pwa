@@ -1,105 +1,88 @@
-/* ===== Base ===== */
-body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: #f4f6f9;
+/* Reset */
+body, h1, h2, p, form, select, input, button {
   margin: 0;
   padding: 0;
+  font-family: 'Segoe UI', Tahoma, sans-serif;
+}
+
+body {
+  background: #f4f6f8;
   color: #333;
+  line-height: 1.6;
+  padding: 20px;
 }
 
-/* ===== Header ===== */
 header {
-  background: linear-gradient(135deg, #1a73e8, #0049b7);
-  color: white;
   text-align: center;
-  padding: 2rem 1rem;
-  border-radius: 0 0 25px 25px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  margin-bottom: 20px;
 }
 
-header .app-logo {
-  width: 96px;
-  height: 96px;
-  object-fit: contain;
-  margin-bottom: 1rem;
+.header-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.header-logo .logo {
+  width: 100px;
+  height: 100px;
+  margin-bottom: 10px;
 }
 
 header h1 {
-  margin: 0;
   font-size: 2rem;
-  font-weight: 700;
+  color: #1a73e8;
 }
 
-header .tagline {
-  margin-top: 0.5rem;
+.tagline {
   font-size: 1rem;
-  font-weight: 300;
-  color: #e0e0e0;
+  color: #555;
 }
 
-/* ===== Sections ===== */
 main {
-  padding: 1.5rem;
+  max-width: 800px;
+  margin: auto;
 }
 
 section {
   background: #fff;
-  border-radius: 15px;
-  padding: 1rem 1.5rem;
-  margin-bottom: 1.5rem;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  margin-bottom: 20px;
 }
 
-section h2 {
-  margin-top: 0;
+h2 {
+  margin-bottom: 10px;
   color: #1a73e8;
-  font-size: 1.2rem;
-  border-bottom: 2px solid #e0e0e0;
-  padding-bottom: 0.3rem;
-  margin-bottom: 1rem;
 }
 
-/* ===== Forms ===== */
 form label {
   display: block;
-  margin-bottom: 0.75rem;
-  font-size: 0.9rem;
-  font-weight: 500;
+  margin: 10px 0 5px;
 }
 
-input, select, button {
-  padding: 0.5rem;
-  font-size: 0.9rem;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  margin-top: 0.3rem;
+form select, form input, form button {
   width: 100%;
-  box-sizing: border-box;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
 }
 
-button {
+form button {
   background: #1a73e8;
-  color: #fff;
+  color: white;
   border: none;
   cursor: pointer;
-  font-weight: 600;
-  margin-top: 0.5rem;
-  transition: background 0.2s;
 }
 
-button:hover {
-  background: #0049b7;
+form button:hover {
+  background: #155cb0;
 }
 
-/* ===== Charts ===== */
-canvas {
-  display: block;
-  max-width: 100%;
-  margin: 1rem auto;
-}
-
-/* ===== Save & Export Section ===== */
-#save-session, #load-session, #delete-session,
-#export-csv, #export-pdf {
-  margin-top: 0.5rem;
+footer {
+  text-align: center;
+  margin-top: 20px;
+  color: #777;
 }
