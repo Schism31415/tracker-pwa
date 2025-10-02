@@ -19,6 +19,7 @@ const saveSessionBtn = document.getElementById("save-session");
 const loadSessionBtn = document.getElementById("load-session");
 const deleteSessionBtn = document.getElementById("delete-session");
 const exportCsvBtn = document.getElementById("export-csv");
+const exportChartBtn = document.getElementById("export-chart");
 
 let financeChart;
 
@@ -166,6 +167,18 @@ exportCsvBtn.addEventListener("click", () => {
   document.body.removeChild(link);
 });
 
+// ====== EXPORT CHART (PNG) ======
+exportChartBtn.addEventListener("click", () => {
+  if (!financeChart) {
+    alert("No chart available to export.");
+    return;
+  }
+  const link = document.createElement("a");
+  link.href = financeChart.toBase64Image();
+  link.download = "finance_chart.png";
+  link.click();
+});
+
 // ====== CHART ======
 function updateChart() {
   const labels = entries.map((e) => e.date);
@@ -186,7 +199,7 @@ function updateChart() {
           borderColor: "#28a745",
           backgroundColor: "rgba(40,167,69,0.2)",
           fill: true,
-          tension: 0.4, // curve
+          tension: 0.4,
         },
         {
           label: "Expenses",
@@ -194,7 +207,7 @@ function updateChart() {
           borderColor: "#dc3545",
           backgroundColor: "rgba(220,53,69,0.2)",
           fill: true,
-          tension: 0.4, // curve
+          tension: 0.4,
         },
       ],
     },
