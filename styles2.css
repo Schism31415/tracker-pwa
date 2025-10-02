@@ -137,4 +137,28 @@ canvas {
 .session-actions button {
   flex: 1;
 }
+/* Chart Styling - Premium Black & Gold */
+canvas {
+  background: #1e1e1e; /* matches dark card */
+  border: 2px solid #ffd700; /* gold border */
+  border-radius: 12px;
+  padding: 10px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.6);
+}
+
+/* ChartJS specific styling */
+.chartjs-render-monitor {
+  color: #ffd700; /* gold text for labels */
+}
+
+.chartjs-render-monitor text {
+  fill: #ffd700 !important; /* gold axis labels */
+}
+
+.chart-grid {
+  stroke: #f1f1f1 !important; /* white gridlines */
+  opacity: 0.3;
+}
+
 ```
+
