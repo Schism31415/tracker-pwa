@@ -1,138 +1,83 @@
-let incomes = [];
-let expenses = [];
-let sessions = {};
-let currency = "£"; // default
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Investor's 2-in-1 Property Profit Dashboard</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="manifest" href="manifest.json">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <header>
+    <h1>🏡 Investor's 2-in-1 Property Profit Dashboard</h1>
+    <p class="subtitle">Track your rental income, expenses, tenants and renovations — with clarity and control.</p>
+  </header>
 
-// Chart instances
-let incomeChart, expenseChart;
+  <!-- Currency Selection -->
+  <section class="currency-section">
+    <label for="currency">Currency:</label>
+    <select id="currency">
+      <option value="£">£ (GBP)</option>
+      <option value="$">$ (USD)</option>
+      <option value="€">€ (EUR)</option>
+    </select>
+  </section>
 
-// Update charts
-function updateCharts() {
-  if (!incomeChart) {
-    incomeChart = new Chart(document.getElementById("incomeChart"), {
-      type: "line",
-      data: {
-        labels: [],
-        datasets: [{
-          label: "Income",
-          data: [],
-          borderColor: "#4caf50",
-          fill: false,
-          tension: 0.3
-        }]
-      }
-    });
-  }
+  <!-- Tenant Management -->
+  <section>
+    <h2>Tenants</h2>
+    <input type="text" id="tenant-name" placeholder="Tenant name or unit">
+    <button id="add-tenant">Add Tenant</button>
+    <ul id="tenant-list"></ul>
+  </section>
 
-  if (!expenseChart) {
-    expenseChart = new Chart(document.getElementById("expenseChart"), {
-      type: "line",
-      data: {
-        labels: [],
-        datasets: [{
-          label: "Expenses",
-          data: [],
-          borderColor: "#f44336",
-          fill: false,
-          tension: 0.3
-        }]
-      }
-    });
-  }
+  <!-- Income Form -->
+  <section>
+    <h2>Add Income</h2>
+    <select id="income-tenant">
+      <option value="">-- Select Tenant --</option>
+    </select>
+    <input type="text" id="income-source" placeholder="Source (e.g. Rent, Deposit)">
+    <input type="number" id="income-amount" placeholder="Amount">
+    <input type="date" id="income-date">
+    <button id="add-income">Add Income</button>
+    <ul id="income-list"></ul>
+  </section>
 
-  incomeChart.data.labels = incomes.map((i) => i.date);
-  incomeChart.data.datasets[0].data = incomes.map((i) => i.amount);
-  incomeChart.update();
+  <!-- Expense Form -->
+  <section>
+    <h2>Add Expense</h2>
+    <select id="expense-tenant">
+      <option value="">-- Select Tenant --</option>
+    </select>
+    <input type="text" id="expense-category" placeholder="Category (e.g. Repairs, Taxes)">
+    <input type="number" id="expense-amount" placeholder="Amount">
+    <input type="date" id="expense-date">
+    <button id="add-expense">Add Expense</button>
+    <ul id="expense-list"></ul>
+  </section>
 
-  expenseChart.data.labels = expenses.map((e) => e.date);
-  expenseChart.data.datasets[0].data = expenses.map((e) => e.amount);
-  expenseChart.update();
+  <!-- Graphs -->
+  <section class="charts">
+    <h2>Performance Overview</h2>
+    <canvas id="incomeChart"></canvas>
+    <canvas id="expenseChart"></canvas>
+  </section>
 
-  renderLists();
-}
+  <!-- Sessions -->
+  <section>
+    <h2>Saved Sessions</h2>
+    <button id="save-session">💾 Save Current Session</button>
+    <button id="export-csv">⬇️ Export CSV</button>
+    <ul id="session-list"></ul>
+  </section>
 
-// Render incomes & expenses in lists
-function renderLists() {
-  const incomeList = document.getElementById("income-list");
-  const expenseList = document.getElementById("expense-list");
-  incomeList.innerHTML = "";
-  expenseList.innerHTML = "";
+  <!-- Status -->
+  <footer>
+    <p id="save-status">All changes saved</p>
+  </footer>
 
-  incomes.forEach((i, index) => {
-    const li = document.createElement("li");
-    li.textContent = `${currency}${i.amount} (${i.source}, ${i.date}) `;
-    const delBtn = document.createElement("button");
-    delBtn.textContent = "❌";
-    delBtn.onclick = () => {
-      incomes.splice(index, 1);
-      updateCharts();
-      autoSave();
-    };
-    li.appendChild(delBtn);
-    incomeList.appendChild(li);
-  });
-
-  expenses.forEach((e, index) => {
-    const li = document.createElement("li");
-    li.textContent = `${currency}${e.amount} (${e.category}, ${e.date}) `;
-    const delBtn = document.createElement("button");
-    delBtn.textContent = "❌";
-    delBtn.onclick = () => {
-      expenses.splice(index, 1);
-      updateCharts();
-      autoSave();
-    };
-    li.appendChild(delBtn);
-    expenseList.appendChild(li);
-  });
-}
-
-// Auto-save after changes
-function autoSave() {
-  localStorage.setItem("autosave", JSON.stringify({ incomes, expenses, currency }));
-  document.getElementById("save-status").textContent =
-    "Last saved at " + new Date().toLocaleTimeString();
-}
-
-// Save session
-document.getElementById("save-session").addEventListener("click", () => {
-  const sessionName = prompt("Enter session name:");
-  if (sessionName) {
-    sessions[sessionName] = { incomes, expenses, currency };
-    localStorage.setItem("sessions", JSON.stringify(sessions));
-    refreshSessions();
-  }
-});
-
-// Refresh saved sessions
-function refreshSessions() {
-  const sessionList = document.getElementById("session-list");
-  sessionList.innerHTML = "";
-  for (let name in sessions) {
-    const li = document.createElement("li");
-    li.textContent = name;
-    li.onclick = () => {
-      incomes = sessions[name].incomes || [];
-      expenses = sessions[name].expenses || [];
-      currency = sessions[name].currency || "£";
-      document.getElementById("currency").value = currency;
-      updateCharts();
-    };
-    sessionList.appendChild(li);
-  }
-}
-
-// Income add
-document.getElementById("add-income").addEventListener("click", () => {
-  const source = document.getElementById("income-source").value;
-  const amount = parseFloat(document.getElementById("income-amount").value);
-  const date = document.getElementById("income-date").value;
-  if (!amount || !date) return;
-
-  incomes.push({ source, amount, date });
-  updateCharts();
-  autoSave();
-});
-
-// Expense add
-document.getElementBy
+  <script src="app.js"></script>
+</body>
+</html>
