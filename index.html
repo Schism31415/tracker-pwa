@@ -3,95 +3,57 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Investor Pro Dashboard</title>
-  <link rel="stylesheet" href="styles.css" />
+  <title>Property Investment Tracker</title>
   <link rel="manifest" href="manifest.json" />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <header>
-    <img src="icons/icon-192.png" alt="App Logo" />
-    <h1>Investor's 2-in-1 Property Profit Dashboard</h1>
-    <p>Track rental cash flow & renovation budgets with ease</p>
+    <img src="icons/app-icon-192.png" alt="App Logo" class="app-logo" />
+    <h1>Property Investment Tracker</h1>
+    <p class="tagline">Track, analyse, and optimise your investments</p>
   </header>
 
-  <main class="container">
+  <main>
+    <section id="form-section">
+      <h2>Add Entry</h2>
+      <form id="entry-form">
+        <label for="tenant">Tenant:</label>
+        <select id="tenant" required>
+          <option value="">-- Select Tenant --</option>
+        </select>
+        <button type="button" id="add-tenant">+ Add Tenant</button>
 
-    <!-- Tenant Management -->
-    <section id="tenant-section">
-      <h2>Tenants</h2>
-      <input type="text" id="tenant-name-input" placeholder="Enter tenant name" />
-      <button id="add-tenant-btn">Add Tenant</button>
+        <label for="income">Income (£):</label>
+        <input type="number" id="income" min="0" step="0.01" />
+
+        <label for="expense">Expense (£):</label>
+        <input type="number" id="expense" min="0" step="0.01" />
+
+        <button type="submit">Add Entry</button>
+      </form>
     </section>
 
-    <!-- Income Form -->
-    <form id="income-form">
-      <h2>Add Income</h2>
-      <label>Tenant</label>
-      <select class="tenant-select"></select>
-      <label>Amount</label>
-      <input type="number" name="amount" placeholder="e.g. 1200" required />
-      <button type="submit">Add Income</button>
-    </form>
-
-    <!-- Expense Form -->
-    <form id="expense-form">
-      <h2>Add Expense</h2>
-      <label>Tenant</label>
-      <select class="tenant-select"></select>
-      <label>Amount</label>
-      <input type="number" name="amount" placeholder="e.g. 500" required />
-      <button type="submit">Add Expense</button>
-    </form>
-
-    <!-- Chart Section -->
-    <section class="chart-container">
+    <section id="charts-section">
       <h2>Performance Overview</h2>
-      <canvas id="financeChart"></canvas>
+      <canvas id="overviewChart"></canvas>
     </section>
 
-    <!-- Sessions Section -->
-    <section id="sessions">
+    <section id="sessions-section">
       <h2>Sessions</h2>
-      <button id="save-session-btn">Save Session</button>
-      <select id="load-session-select"></select>
-      <div style="display: flex; gap: 10px; margin-top: 10px;">
-        <button id="load-session-btn">Load Session</button>
-        <button id="delete-session-btn">Delete Session</button>
-      </div>
+      <input type="text" id="session-name" placeholder="Session Name" />
+      <button id="save-session">Save Session</button>
+      <div id="saved-sessions"></div>
     </section>
 
-    <!-- Export Options -->
-    <section class="export-buttons">
-      <button id="export-csv-btn">Export CSV</button>
-      <button id="export-chart-btn">Download Chart</button>
+    <section id="export-section">
+      <h2>Export</h2>
+      <button id="export-csv">Download CSV</button>
+      <button id="export-pdf">Download PDF</button>
     </section>
-
-    <!-- Currency Selector -->
-    <section style="margin-top: 20px; text-align: center;">
-      <label for="currency-select"><strong>Currency:</strong></label>
-      <select id="currency-select">
-        <option value="$">$ - USD</option>
-        <option value="£">£ - GBP</option>
-        <option value="€">€ - EUR</option>
-      </select>
-    </section>
-
   </main>
 
-  <footer>
-    &copy; 2025 Investor Pro Dashboard. All rights reserved.
-  </footer>
-
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="app.js"></script>
-  <script>
-  if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("sw.js")
-      .then(() => console.log("Service Worker registered"))
-      .catch(err => console.error("SW registration failed", err));
-  }
-</script>
-
 </body>
 </html>
-
