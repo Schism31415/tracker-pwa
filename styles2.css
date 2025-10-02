@@ -9,8 +9,8 @@
 
 /* Body */
 body {
-  background: #f5f7fa;
-  color: #333;
+  background: #121212; /* deep black background */
+  color: #f1f1f1;
   line-height: 1.6;
   padding: 0;
   margin: 0;
@@ -18,11 +18,11 @@ body {
 
 /* Header */
 .app-header {
-  background: linear-gradient(135deg, #1d3557, #457b9d);
-  color: #fff;
+  background: linear-gradient(135deg, #000000, #1a1a1a);
+  color: #ffd700; /* gold */
   text-align: center;
   padding: 20px 10px;
-  border-bottom: 4px solid #1d3557;
+  border-bottom: 3px solid #ffd700;
 }
 
 .app-logo {
@@ -33,29 +33,32 @@ body {
 }
 
 .app-header h1 {
-  font-size: 1.8rem;
+  font-size: 2rem;
   margin-bottom: 5px;
+  color: #ffd700;
 }
 
 .app-header .tagline {
   font-size: 1rem;
-  opacity: 0.9;
+  color: #f1f1f1;
+  opacity: 0.8;
 }
 
 /* Sections */
 section {
-  background: #fff;
+  background: #1e1e1e; /* dark card */
   margin: 20px auto;
   padding: 20px;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.7);
   max-width: 800px;
+  border: 1px solid #ffd700;
 }
 
 h2 {
   margin-bottom: 15px;
   font-size: 1.4rem;
-  color: #1d3557;
+  color: #ffd700;
 }
 
 /* Forms & Inputs */
@@ -63,27 +66,37 @@ form label {
   display: block;
   margin: 10px 0 5px;
   font-weight: bold;
+  color: #f1f1f1;
 }
 
 input, select, button {
   padding: 10px;
   margin-bottom: 15px;
   border-radius: 6px;
-  border: 1px solid #ccc;
+  border: 1px solid #555;
   width: 100%;
   font-size: 1rem;
+  background: #2b2b2b;
+  color: #f1f1f1;
 }
 
+input:focus, select:focus {
+  outline: none;
+  border-color: #ffd700;
+}
+
+/* Buttons */
 button {
-  background: #457b9d;
-  color: white;
+  background: #ffd700;
+  color: #000;
+  font-weight: bold;
   border: none;
   cursor: pointer;
-  transition: background 0.3s ease;
+  transition: all 0.3s ease;
 }
 
 button:hover {
-  background: #1d3557;
+  background: #e6c200; /* darker gold */
 }
 
 /* Tenant section */
@@ -105,6 +118,9 @@ canvas {
   margin: 20px auto;
   display: block;
   max-width: 100%;
+  background: #fff;
+  border-radius: 8px;
+  padding: 10px;
 }
 
 /* Session actions */
