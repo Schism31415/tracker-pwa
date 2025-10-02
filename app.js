@@ -1,236 +1,210 @@
-let incomes = [];
-let expenses = [];
-let tenants = [];
-let sessions = {};
 let currency = "£";
+let tenants = JSON.parse(localStorage.getItem("tenants")) || [];
+let incomes = JSON.parse(localStorage.getItem("incomes")) || [];
+let expenses = JSON.parse(localStorage.getItem("expenses")) || [];
+let sessions = JSON.parse(localStorage.getItem("sessions")) || [];
 
-// Chart instances
-let incomeChart, expenseChart;
+const currencySelect = document.getElementById("currency");
+const incomeTenantSelect = document.getElementById("income-tenant");
+const expenseTenantSelect = document.getElementById("expense-tenant");
+const saveStatus = document.getElementById("save-status");
 
-// --- Utility ---
-function saveToLocal() {
-  localStorage.setItem("autosave", JSON.stringify({ incomes, expenses, tenants, currency }));
-  document.getElementById("save-status").textContent =
-    "Last saved at " + new Date().toLocaleTimeString();
+// Save state
+function saveData() {
+  localStorage.setItem("tenants", JSON.stringify(tenants));
+  localStorage.setItem("incomes", JSON.stringify(incomes));
+  localStorage.setItem("expenses", JSON.stringify(expenses));
+  localStorage.setItem("sessions", JSON.stringify(sessions));
+  saveStatus.textContent = "All changes saved";
 }
 
-function refreshTenantDropdowns() {
-  const incomeTenant = document.getElementById("income-tenant");
-  const expenseTenant = document.getElementById("expense-tenant");
-  incomeTenant.innerHTML = '<option value="">-- Select Tenant --</option>';
-  expenseTenant.innerHTML = '<option value="">-- Select Tenant --</option>';
-
-  tenants.forEach((t) => {
-    const opt1 = document.createElement("option");
-    opt1.value = t;
-    opt1.textContent = t;
-    incomeTenant.appendChild(opt1);
-
-    const opt2 = document.createElement("option");
-    opt2.value = t;
-    opt2.textContent = t;
-    expenseTenant.appendChild(opt2);
-  });
-}
-
+// Tenants
 function renderTenants() {
-  const tenantList = document.getElementById("tenant-list");
-  tenantList.innerHTML = "";
-  tenants.forEach((t, index) => {
+  const list = document.getElementById("tenant-list");
+  list.innerHTML = "";
+  incomeTenantSelect.innerHTML = "";
+  expenseTenantSelect.innerHTML = "";
+
+  tenants.forEach((tenant, index) => {
     const li = document.createElement("li");
-    li.textContent = t;
-    const delBtn = document.createElement("button");
-    delBtn.textContent = "❌";
-    delBtn.className = "delete-btn";
-    delBtn.onclick = () => {
+    li.textContent = tenant;
+    const btn = document.createElement("button");
+    btn.textContent = "❌";
+    btn.className = "delete-btn";
+    btn.onclick = () => {
       tenants.splice(index, 1);
-      refreshTenantDropdowns();
+      saveData();
       renderTenants();
-      saveToLocal();
+      updateCharts();
     };
-    li.appendChild(delBtn);
-    tenantList.appendChild(li);
+    li.appendChild(btn);
+    list.appendChild(li);
+
+    let opt1 = document.createElement("option");
+    opt1.value = tenant;
+    opt1.textContent = tenant;
+    incomeTenantSelect.appendChild(opt1);
+
+    let opt2 = document.createElement("option");
+    opt2.value = tenant;
+    opt2.textContent = tenant;
+    expenseTenantSelect.appendChild(opt2);
   });
 }
-
-// --- Charts ---
-function updateCharts() {
-  if (!incomeChart) {
-    incomeChart = new Chart(document.getElementById("incomeChart"), {
-      type: "line",
-      data: { labels: [], datasets: [{
-        label: "Income",
-        data: [],
-        borderColor: "#4caf50",
-        backgroundColor: "rgba(76,175,80,0.15)",
-        fill: true,
-        tension: 0.4
-      }]},
-      options: {
-        responsive: true,
-        plugins: {
-          tooltip: { callbacks: { label: ctx => `${currency}${ctx.formattedValue}` } }
-        },
-        scales: { y: { ticks: { callback: v => currency + v } } }
-      }
-    });
+document.getElementById("add-tenant").onclick = () => {
+  const name = document.getElementById("tenant-name").value.trim();
+  if (name) {
+    tenants.push(name);
+    document.getElementById("tenant-name").value = "";
+    saveData();
+    renderTenants();
   }
-  if (!expenseChart) {
-    expenseChart = new Chart(document.getElementById("expenseChart"), {
-      type: "line",
-      data: { labels: [], datasets: [{
-        label: "Expenses",
-        data: [],
-        borderColor: "#f44336",
-        backgroundColor: "rgba(244,67,54,0.15)",
-        fill: true,
-        tension: 0.4
-      }]},
-      options: {
-        responsive: true,
-        plugins: {
-          tooltip: { callbacks: { label: ctx => `${currency}${ctx.formattedValue}` } }
-        },
-        scales: { y: { ticks: { callback: v => currency + v } } }
-      }
-    });
+};
+
+// Income
+document.getElementById("add-income").onclick = () => {
+  const tenant = incomeTenantSelect.value;
+  const source = document.getElementById("income-source").value.trim();
+  const amount = parseFloat(document.getElementById("income-amount").value);
+  const date = document.getElementById("income-date").value;
+
+  if (tenant && source && amount && date) {
+    incomes.push({ tenant, source, amount, date });
+    saveData();
+    renderLists();
+    updateCharts();
   }
+};
 
-  incomeChart.data.labels = incomes.map(i => i.date);
-  incomeChart.data.datasets[0].data = incomes.map(i => i.amount);
-  incomeChart.update();
+// Expense
+document.getElementById("add-expense").onclick = () => {
+  const tenant = expenseTenantSelect.value;
+  const category = document.getElementById("expense-category").value.trim();
+  const amount = parseFloat(document.getElementById("expense-amount").value);
+  const date = document.getElementById("expense-date").value;
 
-  expenseChart.data.labels = expenses.map(e => e.date);
-  expenseChart.data.datasets[0].data = expenses.map(e => e.amount);
-  expenseChart.update();
+  if (tenant && category && amount && date) {
+    expenses.push({ tenant, category, amount, date });
+    saveData();
+    renderLists();
+    updateCharts();
+  }
+};
 
-  renderLists();
-}
-
+// Lists
 function renderLists() {
   const incomeList = document.getElementById("income-list");
-  const expenseList = document.getElementById("expense-list");
   incomeList.innerHTML = "";
-  expenseList.innerHTML = "";
-
-  incomes.forEach((i, idx) => {
+  incomes.forEach((inc, index) => {
     const li = document.createElement("li");
-    li.textContent = `${currency}${i.amount} (${i.source}, ${i.date}, Tenant: ${i.tenant || "N/A"}) `;
-    const delBtn = document.createElement("button");
-    delBtn.textContent = "❌";
-    delBtn.className = "delete-btn";
-    delBtn.onclick = () => { incomes.splice(idx, 1); updateCharts(); saveToLocal(); };
-    li.appendChild(delBtn);
+    li.textContent = `${inc.tenant} – ${inc.source}: ${currency}${inc.amount} (${inc.date})`;
+    const btn = document.createElement("button");
+    btn.textContent = "❌";
+    btn.className = "delete-btn";
+    btn.onclick = () => {
+      incomes.splice(index, 1);
+      saveData();
+      renderLists();
+      updateCharts();
+    };
+    li.appendChild(btn);
     incomeList.appendChild(li);
   });
 
-  expenses.forEach((e, idx) => {
+  const expenseList = document.getElementById("expense-list");
+  expenseList.innerHTML = "";
+  expenses.forEach((exp, index) => {
     const li = document.createElement("li");
-    li.textContent = `${currency}${e.amount} (${e.category}, ${e.date}, Tenant: ${e.tenant || "N/A"}) `;
-    const delBtn = document.createElement("button");
-    delBtn.textContent = "❌";
-    delBtn.className = "delete-btn";
-    delBtn.onclick = () => { expenses.splice(idx, 1); updateCharts(); saveToLocal(); };
-    li.appendChild(delBtn);
+    li.textContent = `${exp.tenant} – ${exp.category}: ${currency}${exp.amount} (${exp.date})`;
+    const btn = document.createElement("button");
+    btn.textContent = "❌";
+    btn.className = "delete-btn";
+    btn.onclick = () => {
+      expenses.splice(index, 1);
+      saveData();
+      renderLists();
+      updateCharts();
+    };
+    li.appendChild(btn);
     expenseList.appendChild(li);
   });
 }
 
-// --- Event listeners ---
-document.getElementById("add-tenant").onclick = () => {
-  const name = document.getElementById("tenant-name").value.trim();
-  if (!name) return;
-  tenants.push(name);
-  document.getElementById("tenant-name").value = "";
-  refreshTenantDropdowns();
-  renderTenants();
-  saveToLocal();
-};
+// Charts
+const incomeChartCtx = document.getElementById("incomeChart").getContext("2d");
+const expenseChartCtx = document.getElementById("expenseChart").getContext("2d");
 
-document.getElementById("add-income").onclick = () => {
-  const tenant = document.getElementById("income-tenant").value;
-  const source = document.getElementById("income-source").value;
-  const amount = parseFloat(document.getElementById("income-amount").value);
-  const date = document.getElementById("income-date").value;
-  if (!amount || !date) return;
-  incomes.push({ tenant, source, amount, date });
-  updateCharts();
-  saveToLocal();
-};
+let incomeChart = new Chart(incomeChartCtx, {
+  type: "line",
+  data: { labels: [], datasets: [{ label: "Income", data: [], borderColor: "#4caf50", backgroundColor: "rgba(76,175,80,0.1)", fill: true, tension: 0.4 }] },
+});
 
-document.getElementById("add-expense").onclick = () => {
-  const tenant = document.getElementById("expense-tenant").value;
-  const category = document.getElementById("expense-category").value;
-  const amount = parseFloat(document.getElementById("expense-amount").value);
-  const date = document.getElementById("expense-date").value;
-  if (!amount || !date) return;
-  expenses.push({ tenant, category, amount, date });
-  updateCharts();
-  saveToLocal();
-};
+let expenseChart = new Chart(expenseChartCtx, {
+  type: "line",
+  data: { labels: [], datasets: [{ label: "Expenses", data: [], borderColor: "#f44336", backgroundColor: "rgba(244,67,54,0.1)", fill: true, tension: 0.4 }] },
+});
 
-document.getElementById("currency").onchange = (e) => {
-  currency = e.target.value;
-  updateCharts();
-  saveToLocal();
-};
+function updateCharts() {
+  const incomeData = {};
+  incomes.forEach(i => { incomeData[i.date] = (incomeData[i.date] || 0) + i.amount; });
+  incomeChart.data.labels = Object.keys(incomeData);
+  incomeChart.data.datasets[0].data = Object.values(incomeData);
+  incomeChart.update();
 
-document.getElementById("save-session").onclick = () => {
-  const sessionName = prompt("Enter session name:");
-  if (sessionName) {
-    sessions[sessionName] = { incomes, expenses, tenants, currency };
-    localStorage.setItem("sessions", JSON.stringify(sessions));
-    refreshSessions();
-  }
-};
+  const expenseData = {};
+  expenses.forEach(e => { expenseData[e.date] = (expenseData[e.date] || 0) + e.amount; });
+  expenseChart.data.labels = Object.keys(expenseData);
+  expenseChart.data.datasets[0].data = Object.values(expenseData);
+  expenseChart.update();
 
+  renderTenantSummary();
+}
+
+// Tenant Summary
+function renderTenantSummary() {
+  const container = document.getElementById("tenant-summary-cards");
+  container.innerHTML = "";
+
+  tenants.forEach(t => {
+    const totalIncome = incomes.filter(i => i.tenant === t).reduce((sum, i) => sum + i.amount, 0);
+    const totalExpense = expenses.filter(e => e.tenant === t).reduce((sum, e) => sum + e.amount, 0);
+    const net = totalIncome - totalExpense;
+
+    const card = document.createElement("div");
+    card.className = "tenant-card";
+    card.innerHTML = `
+      <h3>${t}</h3>
+      <p class="income">Income: ${currency}${totalIncome.toFixed(2)}</p>
+      <p class="expense">Expenses: ${currency}${totalExpense.toFixed(2)}</p>
+      <p class="net">Net: ${currency}${net.toFixed(2)}</p>
+    `;
+    container.appendChild(card);
+  });
+}
+
+// CSV Export
 document.getElementById("export-csv").onclick = () => {
-  let rows = [["Type","Tenant","Category/Source","Amount","Date"]];
-  incomes.forEach(i => rows.push(["Income", i.tenant || "", i.source, i.amount, i.date]));
-  expenses.forEach(e => rows.push(["Expense", e.tenant || "", e.category, e.amount, e.date]));
+  let csv = "Type,Tenant,Category/Source,Amount,Date\n";
+  incomes.forEach(i => { csv += `Income,${i.tenant},${i.source},${i.amount},${i.date}\n`; });
+  expenses.forEach(e => { csv += `Expense,${e.tenant},${e.category},${e.amount},${e.date}\n`; });
 
-  let csv = rows.map(r => r.join(",")).join("\n");
-  let blob = new Blob([csv], { type: "text/csv" });
-  let url = URL.createObjectURL(blob);
-  let a = document.createElement("a");
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
   a.href = url;
-  a.download = "report.csv";
+  a.download = "property_data.csv";
   a.click();
 };
 
-function refreshSessions() {
-  const sessionList = document.getElementById("session-list");
-  sessionList.innerHTML = "";
-  for (let name in sessions) {
-    const li = document.createElement("li");
-    li.textContent = name;
-    li.onclick = () => {
-      incomes = sessions[name].incomes || [];
-      expenses = sessions[name].expenses || [];
-      tenants = sessions[name].tenants || [];
-      currency = sessions[name].currency || "£";
-      document.getElementById("currency").value = currency;
-      refreshTenantDropdowns();
-      renderTenants();
-      updateCharts();
-    };
-    sessionList.appendChild(li);
-  }
-}
-
-// --- Init ---
-window.onload = () => {
-  sessions = JSON.parse(localStorage.getItem("sessions")) || {};
-  refreshSessions();
-  const autosave = JSON.parse(localStorage.getItem("autosave"));
-  if (autosave) {
-    incomes = autosave.incomes || [];
-    expenses = autosave.expenses || [];
-    tenants = autosave.tenants || [];
-    currency = autosave.currency || "£";
-    document.getElementById("currency").value = currency;
-  }
-  refreshTenantDropdowns();
-  renderTenants();
+// Currency
+currencySelect.onchange = () => {
+  currency = currencySelect.value;
   updateCharts();
+  renderLists();
+  renderTenantSummary();
 };
+
+// Init
+renderTenants();
+renderLists();
+updateCharts();
