@@ -18,28 +18,62 @@
 
   <!-- Description -->
   <section class="description">
-    <p>Welcome to your premium investor dashboard. Add tenants, track income & expenses, and visualize performance.</p>
+    <p>Manage tenants, track income and expenses, and visualize financial performance.</p>
   </section>
 
   <!-- Tenant Management -->
   <section>
-    <h2>Tenant Management</h2>
+    <h2>Tenants</h2>
     <div class="tenant-actions">
       <input type="text" id="tenantInput" placeholder="Enter tenant name" />
-      <button type="button" id="addTenant">Add Tenant</button>
-      <button type="button" id="removeTenant">Remove Tenant</button>
+      <button id="addTenant">Add Tenant</button>
+      <button id="removeTenant">Remove Tenant</button>
     </div>
     <label for="tenant">Select Tenant</label>
     <select id="tenant"></select>
   </section>
 
-  <!-- Analytics -->
+  <!-- Income Form -->
   <section>
-    <h2>Analytics</h2>
-    <canvas id="incomeChart" width="400" height="200"></canvas>
-    <canvas id="expenseChart" width="400" height="200"></canvas>
+    <h2>Add Income</h2>
+    <form id="incomeForm">
+      <label for="incomeAmount">Amount</label>
+      <input type="number" id="incomeAmount" required />
+      <button type="submit">Add Income</button>
+    </form>
   </section>
 
+  <!-- Expense Form -->
+  <section>
+    <h2>Add Expense</h2>
+    <form id="expenseForm">
+      <label for="expenseAmount">Amount</label>
+      <input type="number" id="expenseAmount" required />
+      <button type="submit">Add Expense</button>
+    </form>
+  </section>
+
+  <!-- Charts -->
+  <section>
+    <h2>Performance Charts</h2>
+    <canvas id="incomeChart"></canvas>
+    <canvas id="expenseChart"></canvas>
+  </section>
+
+  <!-- Sessions -->
+  <section>
+    <h2>Sessions</h2>
+    <div class="session-actions">
+      <input type="text" id="sessionName" placeholder="Session name" />
+      <button id="saveSession">Save Session</button>
+      <button id="loadSession">Load Session</button>
+      <button id="deleteSession">Delete Session</button>
+    </div>
+    <label for="session">Saved Sessions</label>
+    <select id="session"></select>
+  </section>
+
+  <!-- Scripts -->
   <script src="app-v4.js"></script>
 </body>
 </html>
