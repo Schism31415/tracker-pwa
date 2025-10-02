@@ -1,13 +1,12 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Premium Investor App</title>
-  <!-- Cache-busting CSS link -->
-  <link rel="stylesheet" href="styles2.css?v=4" />
+  <link rel="stylesheet" href="styles2.css" />
   <link rel="manifest" href="manifest.json" />
+  <!-- Chart.js for graphs -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
@@ -20,82 +19,69 @@
 
   <!-- Description -->
   <section class="description">
-    <p>Welcome to your premium financial dashboard. Add tenants, track income & expenses, save sessions, and generate exportable reports.</p>
+    <p>Manage income, expenses, tenants, and sessions with a premium look and feel.</p>
   </section>
 
-  <!-- Tenant Section -->
-  <section class="tenant-section">
-    <h2>Manage Tenants</h2>
+  <!-- Tenant Management -->
+  <section>
+    <h2>Tenants</h2>
     <div class="tenant-actions">
-      <input type="text" id="tenantNameInput" placeholder="Enter tenant name" />
-      <button id="addTenantBtn">Add Tenant</button>
+      <input type="text" id="tenantName" placeholder="Enter tenant name" />
+      <button id="addTenant">Add Tenant</button>
     </div>
-    <select id="tenantDropdown">
+    <select id="tenantSelect">
       <option value="">Select Tenant</option>
     </select>
   </section>
 
-  <!-- Data Entry -->
-  <section class="entry-section">
-    <h2>New Entry</h2>
-    <form id="entryForm">
-      <label for="entryType">Type:</label>
-      <select id="entryType">
+  <!-- Income and Expenses -->
+  <section>
+    <h2>Transactions</h2>
+    <form id="transactionForm">
+      <label for="type">Type</label>
+      <select id="type" required>
         <option value="income">Income</option>
         <option value="expense">Expense</option>
       </select>
 
-      <label for="amount">Amount:</label>
+      <label for="amount">Amount</label>
       <input type="number" id="amount" placeholder="Enter amount" required />
 
-      <label for="currency">Currency:</label>
+      <label for="currency">Currency</label>
       <select id="currency">
-        <option value="GBP">£ GBP</option>
-        <option value="USD">$ USD</option>
-        <option value="EUR">€ EUR</option>
+        <option value="£">£ (GBP)</option>
+        <option value="$">$ (USD)</option>
+        <option value="€">€ (EUR)</option>
       </select>
 
-      <label for="source">Source / Category:</label>
-      <input type="text" id="source" placeholder="E.g. Rent, Repairs" />
+      <label for="category">Category</label>
+      <input type="text" id="category" placeholder="Enter category" />
 
-      <button type="submit">Add Entry</button>
+      <button type="submit">Add Transaction</button>
     </form>
   </section>
 
-  <!-- Charts -->
-  <section class="charts-section">
-    <h2>Performance Overview</h2>
-    <canvas id="lineChart"></canvas>
-    <canvas id="barChart"></canvas>
+  <!-- Analytics / Charts -->
+  <section>
+    <h2>Analytics</h2>
+    <canvas id="incomeChart" width="400" height="200"></canvas>
+    <canvas id="expenseChart" width="400" height="200"></canvas>
   </section>
 
-  <!-- Sessions -->
-  <section class="session-section">
+  <!-- Session Management -->
+  <section>
     <h2>Sessions</h2>
     <div class="session-actions">
       <input type="text" id="sessionName" placeholder="Session name" />
-      <button id="saveSessionBtn">Save Session</button>
-      <button id="loadSessionBtn">Load Session</button>
-      <button id="deleteSessionBtn">Delete Session</button>
+      <button id="saveSession">Save</button>
+      <button id="loadSession">Load</button>
+      <button id="deleteSession">Delete</button>
+      <button id="exportCSV">Export CSV</button>
+      <button id="exportPDF">Export PDF</button>
     </div>
-    <select id="sessionDropdown">
-      <option value="">Select Saved Session</option>
-    </select>
   </section>
 
-  <!-- Exports -->
-  <section class="export-section">
-    <h2>Exports</h2>
-    <button id="exportCSV">Download CSV</button>
-    <button id="exportPDF">Download PDF</button>
-  </section>
-
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="app-v3.js"></script>
+  <!-- JS -->
+  <script src="app.js"></script>
 </body>
 </html>
-
-
-
-
-
