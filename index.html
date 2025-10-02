@@ -1,19 +1,27 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Investor Dashboard</title>
+
+  <!-- Premium font -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+
+  <!-- Styles -->
   <link rel="stylesheet" href="styles.css" />
+
+  <!-- Manifest for PWA -->
   <link rel="manifest" href="manifest.json" />
+
+  <!-- Favicon fallback -->
+  <link rel="icon" type="image/png" href="icons/icon-192.png" />
 </head>
 <body>
   <header>
-    Investor Dashboard
-    <p style="font-size:0.9rem; font-weight:400; color:#f0f0f0; margin-top:0.5rem;">
-      Track cashflow, tenants, and financial performance in one premium app.
-    </p>
+    <img src="icons/icon-192.png" alt="App Logo" style="height:48px; margin-bottom:0.5rem;" />
+    <h1>Investor Dashboard</h1>
+    <p class="tagline">Track cashflow, tenants, and performance in one premium app</p>
   </header>
 
   <div class="container">
@@ -75,11 +83,11 @@
   </div>
 
   <footer>
-    &copy; 2025 Investor Dashboard — Designed with premium performance in mind
+    &copy; 2025 Investor Dashboard — Designed for premium performance
   </footer>
 
+  <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
-```
