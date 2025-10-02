@@ -1,86 +1,124 @@
-/* Reset */
-* { margin: 0; padding: 0; box-sizing: border-box; }
+```css
+/* Global Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
 
+/* Body */
 body {
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  background: #f9fafb;
-  color: #111827;
+  background: #f5f7fa;
+  color: #333;
   line-height: 1.6;
-  padding: 0 1rem 2rem;
+  padding: 0;
+  margin: 0;
 }
 
-header {
+/* Header */
+.app-header {
+  background: linear-gradient(135deg, #1d3557, #457b9d);
+  color: #fff;
   text-align: center;
-  padding: 2rem 1rem;
-  background: linear-gradient(135deg, #2563eb, #1e3a8a);
-  color: white;
-  border-radius: 0 0 20px 20px;
-  margin-bottom: 2rem;
+  padding: 20px 10px;
+  border-bottom: 4px solid #1d3557;
 }
 
-header .logo {
-  width: 80px;
-  height: 80px;
-  border-radius: 20px;
-  margin-bottom: 1rem;
+.app-logo {
+  width: 96px;
+  height: 96px;
+  max-width: 25vw;
+  margin-bottom: 10px;
 }
 
-header h1 {
+.app-header h1 {
   font-size: 1.8rem;
-  margin-bottom: 0.5rem;
+  margin-bottom: 5px;
 }
 
-header .subtitle {
+.app-header .tagline {
   font-size: 1rem;
   opacity: 0.9;
 }
 
-main section {
-  background: white;
-  padding: 1.5rem;
+/* Sections */
+section {
+  background: #fff;
+  margin: 20px auto;
+  padding: 20px;
   border-radius: 12px;
-  margin-bottom: 1.5rem;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  max-width: 800px;
 }
 
 h2 {
-  margin-bottom: 1rem;
-  font-size: 1.25rem;
-  color: #1e3a8a;
+  margin-bottom: 15px;
+  font-size: 1.4rem;
+  color: #1d3557;
+}
+
+/* Forms & Inputs */
+form label {
+  display: block;
+  margin: 10px 0 5px;
+  font-weight: bold;
 }
 
 input, select, button {
-  padding: 0.5rem;
-  margin: 0.25rem 0;
+  padding: 10px;
+  margin-bottom: 15px;
   border-radius: 6px;
-  border: 1px solid #d1d5db;
-  font-size: 0.95rem;
+  border: 1px solid #ccc;
+  width: 100%;
+  font-size: 1rem;
 }
 
 button {
-  background: #2563eb;
+  background: #457b9d;
   color: white;
   border: none;
   cursor: pointer;
-  margin-top: 0.5rem;
+  transition: background 0.3s ease;
 }
 
 button:hover {
-  background: #1e40af;
+  background: #1d3557;
 }
 
-table {
-  width: 100%;
-  border-collapse: collapse;
+/* Tenant section */
+.tenant-actions {
+  display: flex;
+  gap: 10px;
 }
 
-table th, table td {
-  border: 1px solid #e5e7eb;
-  padding: 0.5rem;
-  text-align: center;
+.tenant-actions input {
+  flex: 2;
 }
 
+.tenant-actions button {
+  flex: 1;
+}
+
+/* Charts */
 canvas {
+  margin: 20px auto;
+  display: block;
   max-width: 100%;
-  margin-top: 1rem;
 }
+
+/* Session actions */
+.session-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.session-actions input {
+  flex: 2;
+}
+
+.session-actions button {
+  flex: 1;
+}
+```
