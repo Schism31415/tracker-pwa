@@ -3,88 +3,87 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>The Investor's 2-in-1 Profit Dashboard</title>
+  <title>Investor Dashboard</title>
+  <link rel="stylesheet" href="styles.css">
   <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="styles2.css">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
   <header>
-    <h1>The Investor's 2-in-1 Profit Dashboard</h1>
-    <label for="currencySelector" class="currency-label">
-      Currency:
-      <select id="currencySelector">
-        <option value="$">USD ($)</option>
-        <option value="£">GBP (£)</option>
-        <option value="€">EUR (€)</option>
-        <option value="¥">JPY (¥)</option>
-        <option value="C$">CAD (C$)</option>
-        <option value="A$">AUD (A$)</option>
-      </select>
-    </label>
+    <h1>Investor's 2-in-1 Profit Dashboard</h1>
+    <p class="tagline">Track rental cash flow and renovation costs in one clean, premium app.</p>
   </header>
 
   <main>
-    <!-- Cash Flow Tracker -->
-    <div class="card">
-      <h2>Cash Flow Tracker</h2>
-      <form id="cashFlowForm">
-        <label>Income Amount (<span class="currency-output">$</span>)
-          <input type="number" id="income" required>
-        </label>
-        <label>Expense Category
-          <select id="expenseCategory">
-            <option>Mortgage/Taxes</option>
-            <option>Insurance</option>
-            <option>Utilities</option>
-            <option>Maintenance</option>
-            <option>Management Fees</option>
-          </select>
-        </label>
-        <label>Expense Amount (<span class="currency-output">$</span>)
-          <input type="number" id="expense" required>
-        </label>
-        <button type="submit">Add Entry</button>
-      </form>
-      <div class="chart-container">
-        <canvas id="cashFlowChart"></canvas>
-      </div>
-    </div>
+    <!-- Income Entry -->
+    <section class="card">
+      <h2>Income Entry</h2>
+      <label for="income-source">Source:</label>
+      <select id="income-source">
+        <option value="Rent">Rent</option>
+        <option value="Deposit">Deposit</option>
+        <option value="Late Fee">Late Fee</option>
+        <option value="Other">Other</option>
+      </select>
 
-    <!-- Renovation Tracker -->
-    <div class="card">
+      <label for="income-amount">Amount:</label>
+      <input type="number" id="income-amount" placeholder="Enter amount">
+
+      <label for="income-date">Date:</label>
+      <input type="date" id="income-date">
+
+      <button id="add-income">Add Income</button>
+    </section>
+
+    <!-- Expense Entry -->
+    <section class="card">
+      <h2>Expense Entry</h2>
+      <label for="expense-category">Category:</label>
+      <input type="text" id="expense-category" placeholder="e.g. Mortgage, Taxes, Repairs">
+
+      <label for="expense-amount">Amount:</label>
+      <input type="number" id="expense-amount" placeholder="Enter amount">
+
+      <label for="expense-date">Date:</label>
+      <input type="date" id="expense-date">
+
+      <button id="add-expense">Add Expense</button>
+    </section>
+
+    <!-- Summary & Charts -->
+    <section class="card">
+      <h2>Cash Flow Summary</h2>
+      <canvas id="cashflow-chart"></canvas>
+    </section>
+
+    <section class="card">
       <h2>Renovation Budget Tracker</h2>
-      <form id="renoForm">
-        <label>Job Type
-          <select id="renoCategory">
-            <option>Roofing</option>
-            <option>Kitchen</option>
-            <option>Flooring</option>
-            <option>Plumbing</option>
-            <option>Other</option>
-          </select>
-        </label>
-        <label>Budget (<span class="currency-output">$</span>)
-          <input type="number" id="renoBudget" required>
-        </label>
-        <label>Actual (<span class="currency-output">$</span>)
-          <input type="number" id="renoActual" required>
-        </label>
-        <button type="submit">Add Renovation</button>
-      </form>
-      <div class="chart-container">
-        <canvas id="renoChart"></canvas>
-      </div>
-    </div>
+      <canvas id="renovation-chart"></canvas>
+    </section>
+
+    <!-- Sessions -->
+    <section class="card">
+      <h2>Sessions</h2>
+      <input type="text" id="session-name" placeholder="Name this session">
+      <button id="save-session">Save Session</button>
+      <select id="session-list"></select>
+      <button id="load-session">Load Session</button>
+      <button id="delete-session">Delete Session</button>
+    </section>
+
+    <!-- Export -->
+    <section class="card">
+      <h2>Export Data</h2>
+      <button id="export-csv">Download CSV</button>
+      <button id="export-chart">Download Chart</button>
+    </section>
   </main>
 
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="app.js"></script>
   <script>
-  if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("sw.js").catch(console.error);
-  }
-</script>
-
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("sw.js").catch(console.error);
+    }
+  </script>
 </body>
 </html>
-
-
