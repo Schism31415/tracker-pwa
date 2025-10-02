@@ -1,13 +1,12 @@
 {
-  "name": "Investor's 2-in-1 Property Profit Dashboard",
-  "short_name": "Investor Dashboard",
-  "description": "Track rental income, expenses, renovation budgets, and cash flow in one premium dashboard. Save sessions, export reports, and manage tenants with ease.",
-  "start_url": "/index.html",
-  "scope": "/",
+  "name": "Investor Dashboard",
+  "short_name": "Investor",
+  "description": "Track rental property income, expenses, tenants, and cashflow with ease.",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0d1117",
-  "theme_color": "#1f6feb",
-  "orientation": "portrait",
+  "theme_color": "#0d1117",
+  "orientation": "portrait-primary",
   "icons": [
     {
       "src": "icons/icon-192.png",
